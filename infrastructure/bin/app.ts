@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
+import { VpcStack } from '../lib/vpc-stack';
 
 // 앱 인스턴스 생성
 // アプリインスタンス作成
@@ -24,13 +25,24 @@ cdk.Tags.of(app).add('Project', 'nextjs-portfolio');
 cdk.Tags.of(app).add('Environment', environment);
 cdk.Tags.of(app).add('ManagedBy', 'CDK');
 
-// TODO: 각 스택은 Task 2.2 ~ 2.6에서 순차적으로 추가 예정
-// TODO: 各スタックはTask 2.2 ~ 2.6で順次追加予定
+// ============================================================
+// 스택 생성
+// スタック作成
+// ============================================================
 
-// VpcStack: Task 2.2에서 추가
-// EcrStack: Task 2.3에서 추가
-// Ec2Stack: Task 2.4에서 추가
-// AlbStack: Task 2.5에서 추가
-// CloudFrontStack: Task 2.6에서 추가
+// VPC Stack (Task 2.2)
+// 네트워크 인프라 기반
+// ネットワークインフラ基盤
+const vpcStack = new VpcStack(app, 'VpcStack', {
+  env,
+  projectName,
+  environment,
+  description: 'VPC infrastructure for portfolio site',
+});
+
+// TODO: EcrStack - Task 2.3에서 추가
+// TODO: Ec2Stack - Task 2.4에서 추가 (vpcStack.vpc 참조)
+// TODO: AlbStack - Task 2.5에서 추가
+// TODO: CloudFrontStack - Task 2.6에서 추가
 
 app.synth();
