@@ -1,206 +1,265 @@
-// 히어로 섹션 컴포넌트 - 메인 비주얼
-// ヒーローセクションコンポーネント - メインビジュアル
+// Hero Section Component - Main Visual (BizReach Style)
+// ヒーローセクションコンポーネント - メインビジュアル（BizReachスタイル）
 "use client";
 
 import { useEffect, useState } from "react";
-import VideoPlayer from "./VideoPlayer";
+import Image from "next/image";
 
 /**
- * HeroSection 컴포넌트
+ * HeroSection Component
  * HeroSectionコンポーネント
  *
- * 첫 인상을 결정하는 메인 비주얼 영역
- * 第一印象を決定するメインビジュアル領域
+ * BizReach style impactful hero section
+ * BizReachスタイルのインパクトのあるヒーローセクション
  *
- * 디자인 포인트:
- * - 다크 네이비 + 골드 조합으로 고급스러움 표현
- * - 미세한 그라데이션과 그레인 텍스처로 깊이감
- * - 타이핑 애니메이션으로 시선 유도
+ * Design Points:
+ * - Mobile: Side-by-side layout with text left, model right
+ * - Desktop: Full-screen banner image for strong first impression
  *
  * デザインポイント:
- * - ダークネイビー + ゴールドの組み合わせで高級感を表現
- * - 微細なグラデーションとグレインテクスチャで深みを演出
- * - タイピングアニメーションで視線誘導
+ * - モバイル: テキスト左、モデル右の横並びレイアウト
+ * - デスクトップ: フルスクリーンバナー画像で強烈な第一印象
  */
-/**
- * YouTube 비디오 설정
- * YouTubeビデオ設定
- *
- * BizReach 스타일 광고 영상
- * BizReachスタイル広告動画
- */
-const VIDEO_CONFIG = {
-  // YouTube 비디오 ID (URL의 /embed/ 이후 부분)
-  // YouTubeビデオID（URLの/embed/以降の部分）
-  videoId: "Q-gDoHFVtFA",
-
-  // 비디오 제목 (접근성용)
-  // ビデオタイトル（アクセシビリティ用）
-  title: "ビズリーチ テレビCM 「新カフェ」篇 30秒",
-};
-
 export default function HeroSection() {
-  // 텍스트 페이드인 애니메이션 상태
-  // テキストフェードインアニメーション状態
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // 마운트 후 애니메이션 시작
-    // マウント後アニメーション開始
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <section className="relative min-h-screen py-20 flex items-center justify-center overflow-hidden bg-slate-950">
-      {/* 배경 그라데이션 레이어 / 背景グラデーションレイヤー */}
-      <div className="absolute inset-0">
-        {/* 메인 그라데이션 / メイングラデーション */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+    <>
+      {/* Mobile Layout / モバイルレイアウト */}
+      <section className="md:hidden relative overflow-hidden">
+        <div className="relative min-h-[45vh]">
+          {/* Background: Model Image / 背景: モデル画像 */}
+          <div className="absolute inset-0">
+            <Image
+              src="/bizreach-banner-model-grok.png"
+              alt="ハイクラス転職サービス"
+              fill
+              className="object-cover object-[70%_25%]"
+              priority
+              sizes="100vw"
+            />
+            {/* Left side gradient overlay / 左側グラデーションオーバーレイ */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-900/90 via-red-900/60 to-transparent" />
+          </div>
 
-        {/* 골드 액센트 그라데이션 / ゴールドアクセントグラデーション */}
-        <div className="absolute top-1/4 -right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-1/4 -left-1/4 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl" />
+          {/* Text Content / テキストコンテンツ */}
+          <div className="relative flex flex-col justify-center px-4 py-6 z-10 w-[60%] min-h-[45vh]">
+            <h1
+              className={`text-xl font-bold text-white leading-tight transform transition-all duration-1000 ${
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+            >
+              <span className="block">登録するだけで</span>
+              <span className="block">驚きのスカウトが届く</span>
+            </h1>
+            <p
+              className={`mt-3 text-2xl font-black text-amber-400 transform transition-all duration-1000 delay-200 ${
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+            >
+              ビズリーチ
+            </p>
+          </div>
+        </div>
+      </section>
 
-        {/* 그리드 패턴 오버레이 / グリッドパターンオーバーレイ */}
+      {/* Mobile CTA Section / モバイルCTAセクション */}
+      <section className="md:hidden">
         <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: "60px 60px",
-          }}
-        />
-
-        {/* 노이즈 텍스처 / ノイズテクスチャ */}
-        <div
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
-
-      {/* 메인 콘텐츠 / メインコンテンツ */}
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-        {/* 서브 헤드라인 / サブヘッドライン */}
-        <div
-          className={`transform transition-all duration-1000 delay-200 ${
+          className={`bg-white border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] px-6 py-6 transform transition-all duration-1000 delay-400 ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-medium tracking-wide">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            Available for Work
-          </span>
-        </div>
+          <h2 className="text-xl font-bold text-slate-900 text-center mb-3">
+            無料で会員登録
+          </h2>
+          <p className="text-sm text-slate-600 text-center mb-5">
+            無料でスカウト受信、求人の閲覧が可能です。
+          </p>
 
-        {/* 메인 헤드라인 / メインヘッドライン */}
-        <h1
-          className={`mt-8 text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white transform transition-all duration-1000 delay-400 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <span className="block">Creative</span>
-          <span className="block mt-2 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
-            Developer
-          </span>
-        </h1>
-
-        {/* 설명 텍스트 / 説明テキスト */}
-        <p
-          className={`mt-8 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed transform transition-all duration-1000 delay-600 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          Building exceptional digital experiences with modern technologies.
-          <br className="hidden md:block" />
-          Specialized in{" "}
-          <span className="text-white font-medium">React</span>,{" "}
-          <span className="text-white font-medium">TypeScript</span>, and{" "}
-          <span className="text-white font-medium">AWS</span>.
-        </p>
-
-        {/* CTA 버튼 그룹 / CTAボタングループ */}
-        <div
-          className={`mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 transform transition-all duration-1000 delay-800 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          {/* 프라이머리 버튼 / プライマリボタン */}
-          <a
-            href="#projects"
-            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/30 hover:-translate-y-1"
-          >
-            <span className="relative z-10">View Projects</span>
-            <svg
-              className="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
+          {/* Email Registration Form / メール登録フォーム */}
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+            <div>
+              <label htmlFor="email-mobile" className="block text-sm font-medium text-slate-700 mb-2">
+                メールアドレス
+              </label>
+              <input
+                type="email"
+                id="email-mobile"
+                placeholder="example@bizreach.co.jp"
+                className="w-full px-4 py-4 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
-            </svg>
-            {/* 호버 글로우 / ホバーグロー */}
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </a>
-
-          {/* 세컨더리 버튼 / セカンダリボタン */}
-          <a
-            href="#about"
-            className="group inline-flex items-center gap-3 px-8 py-4 border border-slate-700 text-white font-medium rounded-xl hover:bg-slate-800/50 hover:border-slate-600 transition-all duration-300"
-          >
-            <span>Learn More</span>
-            <svg
-              className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            </div>
+            <p className="text-xs text-slate-500 text-center">
+              <a href="#" className="text-red-600 hover:underline">個人情報の取り扱い</a>
+              、及び、
+              <a href="#" className="text-red-600 hover:underline">利用規約</a>
+              に同意して
+            </p>
+            <button
+              type="submit"
+              className="block w-full py-4 bg-red-600 text-white font-bold text-lg text-center rounded-lg hover:bg-red-700 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 14l-7 7m0 0l-7-7m7 7V3"
-              />
-            </svg>
-          </a>
+              会員登録（無料）する
+            </button>
+          </form>
         </div>
+      </section>
 
-        {/* 비디오 플레이어 섹션 / ビデオプレイヤーセクション */}
-        <div
-          className={`mt-16 transform transition-all duration-1000 delay-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <VideoPlayer
-            videoId={VIDEO_CONFIG.videoId}
-            title={VIDEO_CONFIG.title}
-            className="max-w-4xl mx-auto"
+      {/* Desktop Layout / デスクトップレイアウト */}
+      <section className="hidden md:flex relative min-h-screen items-center justify-center overflow-hidden">
+        {/* Background Image / 背景画像 */}
+        <div className="absolute inset-0 bg-slate-950">
+          <Image
+            src="/bizreach-banner-model-grok.png"
+            alt="ハイクラス転職サービス"
+            fill
+            className="object-cover object-center"
+            priority
+            sizes="100vw"
           />
+          {/* Dark Overlay Gradient / ダークオーバーレイグラデーション */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/40 to-slate-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20" />
         </div>
-      </div>
 
-      {/* 스크롤 인디케이터 / スクロールインジケーター */}
-      <div
-        className={`absolute bottom-8 left-1/2 -translate-x-1/2 transform transition-all duration-1000 delay-1000 ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs text-slate-500 tracking-widest uppercase">
-            Scroll
-          </span>
-          <div className="w-6 h-10 rounded-full border-2 border-slate-700 flex justify-center pt-2">
-            <div className="w-1 h-2 bg-amber-500 rounded-full animate-bounce" />
+        {/* Main Content / メインコンテンツ */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Text Content / 左側: テキストコンテンツ */}
+            <div className="text-left">
+              {/* Sub Headline / サブヘッドライン */}
+              <div
+                className={`transform transition-all duration-1000 delay-200 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-4"
+                }`}
+              >
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-full text-amber-400 text-sm font-medium tracking-wide">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  選ばれた人だけの転職サイト
+                </span>
+              </div>
+
+              {/* Main Headline / メインヘッドライン */}
+              <h1
+                className={`mt-8 text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight transform transition-all duration-1000 delay-400 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                }`}
+              >
+                <span className="block">登録するだけで</span>
+                <span className="block mt-2 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+                  驚きのスカウトが届く
+                </span>
+              </h1>
+
+              {/* Description / 説明テキスト */}
+              <p
+                className={`mt-8 text-xl text-slate-300 max-w-xl leading-relaxed transform transition-all duration-1000 delay-600 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                }`}
+              >
+                ハイクラス求人と出会える転職サイト。
+                <br />
+                あなたの経歴を登録するだけで、厳選された企業から直接スカウトが届きます。
+              </p>
+
+              {/* CTA Button Group / CTAボタングループ */}
+              <div
+                className={`mt-10 flex items-start gap-4 transform transition-all duration-1000 delay-800 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                }`}
+              >
+                {/* Primary Button */}
+                <a
+                  href="#register"
+                  className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/30 hover:-translate-y-1"
+                >
+                  <span className="relative z-10">無料で会員登録</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </a>
+
+                {/* Secondary Button */}
+                <a
+                  href="#process"
+                  className="group inline-flex items-center px-8 py-5 border border-slate-500 text-white font-medium text-lg rounded-xl hover:bg-slate-800/50 hover:border-slate-400 transition-all duration-300"
+                >
+                  <span>詳しく見る</span>
+                </a>
+              </div>
+
+              {/* Trust Indicators / 信頼指標 */}
+              <div
+                className={`mt-10 flex items-center gap-6 transform transition-all duration-1000 delay-1000 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="text-slate-400 text-sm">完全無料</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5 text-green-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="text-slate-400 text-sm">会員数200万人以上</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Empty space (to show image) / 右側: 空白（画像が見えるように） */}
+            <div className="hidden lg:block" />
           </div>
         </div>
-      </div>
-    </section>
+
+        {/* Scroll Indicator / スクロールインジケーター */}
+        <div
+          className={`absolute bottom-8 left-1/2 -translate-x-1/2 transform transition-all duration-1000 delay-1000 ${
+            isVisible ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs text-slate-400 tracking-widest uppercase">
+              Scroll
+            </span>
+            <div className="w-6 h-10 rounded-full border-2 border-slate-600 flex justify-center pt-2">
+              <div className="w-1 h-2 bg-amber-500 rounded-full animate-bounce" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
