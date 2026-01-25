@@ -23,28 +23,20 @@ import VideoPlayer from "./VideoPlayer";
  * - タイピングアニメーションで視線誘導
  */
 /**
- * 비디오 소스 URL (CloudFront 경유 S3)
- * ビデオソースURL（CloudFront経由S3）
+ * YouTube 비디오 설정
+ * YouTubeビデオ設定
  *
- * S3 버킷에 영상을 업로드하면 자동으로 재생됩니다.
- * S3バケットに動画をアップロードすると自動的に再生されます。
- *
- * 업로드 방법:
- * aws s3 cp your-video.mp4 s3://portfolio-dev-error-pages-{account-id}/videos/hero-video.mp4
- *
- * アップロード方法:
- * aws s3 cp your-video.mp4 s3://portfolio-dev-error-pages-{account-id}/videos/hero-video.mp4
+ * BizReach 스타일 광고 영상
+ * BizReachスタイル広告動画
  */
 const VIDEO_CONFIG = {
-  // CloudFront를 통한 비디오 URL
-  // CloudFrontを通じたビデオURL
-  // 비디오가 없으면 undefined로 설정하여 플레이스홀더 표시
-  // ビデオがない場合はundefinedに設定してプレースホルダー表示
-  src: process.env.NEXT_PUBLIC_HERO_VIDEO_URL || undefined,
+  // YouTube 비디오 ID (URL의 /embed/ 이후 부분)
+  // YouTubeビデオID（URLの/embed/以降の部分）
+  videoId: "Q-gDoHFVtFA",
 
-  // 포스터 이미지 (영상 로드 전 표시)
-  // ポスター画像（動画ロード前に表示）
-  poster: process.env.NEXT_PUBLIC_HERO_POSTER_URL || undefined,
+  // 비디오 제목 (접근성용)
+  // ビデオタイトル（アクセシビリティ用）
+  title: "ビズリーチ テレビCM 「新カフェ」篇 30秒",
 };
 
 export default function HeroSection() {
@@ -187,9 +179,9 @@ export default function HeroSection() {
           }`}
         >
           <VideoPlayer
-            src={VIDEO_CONFIG.src}
-            poster={VIDEO_CONFIG.poster}
-            className="max-w-4xl mx-auto shadow-2xl shadow-amber-500/10"
+            videoId={VIDEO_CONFIG.videoId}
+            title={VIDEO_CONFIG.title}
+            className="max-w-4xl mx-auto"
           />
         </div>
       </div>
