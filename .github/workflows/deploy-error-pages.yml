@@ -120,10 +120,15 @@ jobs:
             --cache-control "max-age=300" \
             --content-type "text/html; charset=utf-8"
 
-          # 에셋 파일 업로드 (긴 캐시, 해시된 파일명)
-          # アセットファイルアップロード（長いキャッシュ、ハッシュ化ファイル名）
+          # _astro 에셋 파일 업로드 (긴 캐시, 해시된 파일명)
+          # _astroアセットファイルアップロード（長いキャッシュ、ハッシュ化ファイル名）
           aws s3 sync dist/_astro "s3://$S3_BUCKET/_astro" \
             --cache-control "max-age=31536000, immutable"
+
+          # assets 폴더 업로드 (이미지, 파비콘 등)
+          # assetsフォルダアップロード（画像、ファビコンなど）
+          aws s3 sync dist/assets "s3://$S3_BUCKET/assets" \
+            --cache-control "max-age=86400"
 
       # ============================================================
       # CloudFront 캐시 무효화
@@ -147,4 +152,4 @@ jobs:
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "$DISTRIBUTION_ID" \
-            --paths "/404.html"
+            --paths "/404.html" "/assets/*"
