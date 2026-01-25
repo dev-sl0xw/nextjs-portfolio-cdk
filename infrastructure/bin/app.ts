@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { VpcStack } from '../lib/vpc-stack';
+import { EcrStack } from '../lib/ecr-stack';
 
 // 앱 인스턴스 생성
 // アプリインスタンス作成
@@ -40,8 +41,17 @@ const vpcStack = new VpcStack(app, 'VpcStack', {
   description: 'VPC infrastructure for portfolio site',
 });
 
-// TODO: EcrStack - Task 2.3에서 추가
-// TODO: Ec2Stack - Task 2.4에서 추가 (vpcStack.vpc 참조)
+// ECR Stack (Task 2.3)
+// Docker 이미지 레지스트리
+// Dockerイメージレジストリ
+const ecrStack = new EcrStack(app, 'EcrStack', {
+  env,
+  projectName,
+  environment,
+  description: 'ECR repository for frontend Docker images',
+});
+
+// TODO: Ec2Stack - Task 2.4에서 추가 (vpcStack.vpc, ecrStack.repository 참조)
 // TODO: AlbStack - Task 2.5에서 추가
 // TODO: CloudFrontStack - Task 2.6에서 추가
 
