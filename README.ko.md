@@ -427,7 +427,6 @@ const apiKey = response.Parameter?.Value;
 
 ```typescript
 // 사용자 인증을 처리하는 함수
-// ユーザー認証を処理する関数
 function handleAuth() {
   // ...
 }
