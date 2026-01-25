@@ -63,9 +63,9 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        # package-lock.json 없이 설치 (플랫폼별 의존성 문제 방지)
-        # package-lock.jsonなしでインストール（プラットフォーム別依存関係問題防止）
-        run: npm install
+        # --force: 플랫폼별 optional 의존성 오류 무시
+        # --force: プラットフォーム別optional依存関係エラー無視
+        run: npm install --force
 
       - name: Build Astro site
         run: npm run build
