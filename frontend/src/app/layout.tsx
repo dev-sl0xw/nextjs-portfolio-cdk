@@ -16,14 +16,14 @@ const inter = Inter({ subsets: ["latin"] });
  * SEO最適化のための基本メタタグ定義
  */
 export const metadata: Metadata = {
-  title: "Portfolio | Creative Developer",
+  title: "転職ならビズリーチ｜選ばれた人だけのハイクラス転職サイト",
   description:
-    "Building exceptional digital experiences with React, TypeScript, and AWS. View my projects and get in touch.",
-  keywords: ["developer", "portfolio", "react", "typescript", "aws", "next.js"],
+    "ハイクラス求人と出会える転職サイト。あなたの経歴を登録するだけで、厳選された企業から直接スカウトが届きます。",
+  keywords: ["転職", "ハイクラス", "スカウト", "求人", "キャリア", "ビズリーチ"],
   authors: [{ name: "Portfolio Developer" }],
   openGraph: {
-    title: "Portfolio | Creative Developer",
-    description: "Building exceptional digital experiences",
+    title: "転職ならビズリーチ｜選ばれた人だけのハイクラス転職サイト",
+    description: "ハイクラス求人と出会える転職サイト。厳選された企業から直接スカウトが届きます。",
     type: "website",
   },
 };
