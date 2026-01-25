@@ -65,7 +65,9 @@ jobs:
           cache-dependency-path: error-pages/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        # --omit=optional: 플랫폼별 optional 의존성 제외 (rollup-darwin 등)
+        # --omit=optional: プラットフォーム別optional依存関係除外（rollup-darwin等）
+        run: npm ci --omit=optional
 
       - name: Build Astro site
         run: npm run build
