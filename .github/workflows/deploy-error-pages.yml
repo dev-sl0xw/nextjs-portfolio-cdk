@@ -1,0 +1,150 @@
+# 에러 페이지 배포 워크플로우
+# エラーページデプロイワークフロー
+#
+# 트리거: main 브랜치에 error-pages/ 변경 푸시 시
+# トリガー: mainブランチにerror-pages/変更プッシュ時
+#
+# 파이프라인:
+# 1. Astro 빌드
+# 2. S3에 정적 파일 업로드
+# 3. CloudFront 캐시 무효화
+#
+# パイプライン:
+# 1. Astroビルド
+# 2. S3に静的ファイルアップロード
+# 3. CloudFrontキャッシュ無効化
+
+name: Deploy Error Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'error-pages/**'
+      - '.github/workflows/deploy-error-pages.yml'
+  # 수동 실행 허용
+  # 手動実行許可
+  workflow_dispatch:
+
+# 동시 실행 방지
+# 同時実行防止
+concurrency:
+  group: error-pages-deploy
+  cancel-in-progress: false
+
+env:
+  # AWS 리전 설정
+  # AWSリージョン設定
+  AWS_REGION: ap-northeast-1
+
+jobs:
+  # ============================================================
+  # Job: 빌드 및 배포
+  # Job: ビルドおよびデプロイ
+  #
+  # Astro 정적 빌드 후 S3에 직접 업로드
+  # Astro静的ビルド後S3に直接アップロード
+  # ============================================================
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: error-pages
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: error-pages/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Astro site
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ============================================================
+      # S3 버킷 이름 조회
+      # S3バケット名照会
+      #
+      # CDK 출력값에서 버킷 이름을 가져옴
+      # CDK CloudFormation export를 통해 동적으로 조회
+      #
+      # CDK出力値からバケット名を取得
+      # CDK CloudFormation exportを通じて動的に照会
+      # ============================================================
+      - name: Get S3 bucket name from CloudFormation
+        id: get-bucket
+        run: |
+          BUCKET_NAME=$(aws cloudformation describe-stacks \
+            --stack-name CloudFrontStack \
+            --query "Stacks[0].Outputs[?OutputKey=='ErrorPagesBucketName'].OutputValue" \
+            --output text)
+          echo "bucket-name=$BUCKET_NAME" >> "$GITHUB_OUTPUT"
+
+      # ============================================================
+      # S3 업로드
+      # S3アップロード
+      #
+      # 업로드 전략:
+      # - 404.html: 루트에 업로드
+      # - _astro/*: 에셋 디렉토리 그대로 업로드
+      # - 캐시 헤더 설정: HTML은 짧게, 에셋은 길게
+      #
+      # アップロード戦略:
+      # - 404.html: ルートにアップロード
+      # - _astro/*: アセットディレクトリそのままアップロード
+      # - キャッシュヘッダー設定: HTMLは短く、アセットは長く
+      # ============================================================
+      - name: Upload to S3
+        env:
+          S3_BUCKET: ${{ steps.get-bucket.outputs.bucket-name }}
+        run: |
+          # HTML 파일 업로드 (짧은 캐시)
+          # HTMLファイルアップロード（短いキャッシュ）
+          aws s3 cp dist/404.html "s3://$S3_BUCKET/404.html" \
+            --cache-control "max-age=300" \
+            --content-type "text/html; charset=utf-8"
+
+          # 에셋 파일 업로드 (긴 캐시, 해시된 파일명)
+          # アセットファイルアップロード（長いキャッシュ、ハッシュ化ファイル名）
+          aws s3 sync dist/_astro "s3://$S3_BUCKET/_astro" \
+            --cache-control "max-age=31536000, immutable"
+
+      # ============================================================
+      # CloudFront 캐시 무효화
+      # CloudFrontキャッシュ無効化
+      #
+      # 404.html만 무효화 (에셋은 해시로 버전 관리)
+      # 404.htmlのみ無効化（アセットはハッシュでバージョン管理）
+      # ============================================================
+      - name: Get CloudFront distribution ID
+        id: get-distribution
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name CloudFrontStack \
+            --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" \
+            --output text)
+          echo "distribution-id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DISTRIBUTION_ID: ${{ steps.get-distribution.outputs.distribution-id }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/404.html"

@@ -181,6 +181,10 @@ export class Ec2Stack extends cdk.Stack {
       instanceName: `${projectName}-${environment}-ec2-web`,
       vpc,
 
+      // SSH 키페어 (GitHub Actions 배포용)
+      // SSHキーペア（GitHub Actionsデプロイ用）
+      keyName: `${projectName}-${environment}-keypair`,
+
       // Public Subnet에 배치 (인터넷 접근 가능)
       // Public Subnetに配置（インターネットアクセス可能）
       vpcSubnets: {

@@ -1,0 +1,18 @@
+# 빌드 출력물 / ビルド出力物
+dist/
+.astro/
+
+# 의존성 / 依存関係
+node_modules/
+
+# 환경 변수 / 環境変数
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

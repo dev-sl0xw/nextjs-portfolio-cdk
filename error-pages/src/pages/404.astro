@@ -1,0 +1,146 @@
+---
+// 404 에러 페이지 - 페이지를 찾을 수 없음
+// 404エラーページ - ページが見つかりません
+
+import Layout from "../layouts/Layout.astro";
+
+/**
+ * 404 Not Found 페이지
+ * 404 Not Foundページ
+ *
+ * CloudFront 에러 응답 시 S3에서 서빙되는 정적 에러 페이지
+ * CloudFrontエラー応答時にS3からサービングされる静的エラーページ
+ *
+ * 디자인 포인트:
+ * - 메인 사이트와 동일한 다크 네이비 + 골드 컬러 스킴
+ * - 사용자 친화적 에러 메시지
+ * - 홈으로 돌아가기 CTA
+ *
+ * デザインポイント:
+ * - メインサイトと同じダークネイビー + ゴールドカラースキーム
+ * - ユーザーフレンドリーなエラーメッセージ
+ * - ホームへ戻るCTA
+ */
+---
+
+<Layout title="404 - Page Not Found">
+  <div class="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950">
+    <!-- 배경 그라데이션 레이어 / 背景グラデーションレイヤー -->
+    <div class="absolute inset-0">
+      <!-- 메인 그라데이션 / メイングラデーション -->
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"></div>
+
+      <!-- 골드 액센트 그라데이션 / ゴールドアクセントグラデーション -->
+      <div class="absolute top-1/4 -right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-1/4 -left-1/4 w-96 h-96 bg-amber-600/5 rounded-full blur-3xl"></div>
+
+      <!-- 그리드 패턴 오버레이 / グリッドパターンオーバーレイ -->
+      <div
+        class="absolute inset-0 opacity-[0.03]"
+        style="background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 60px 60px;"
+      ></div>
+
+      <!-- 노이즈 텍스처 / ノイズテクスチャ -->
+      <div
+        class="absolute inset-0 opacity-[0.015]"
+        style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);"
+      ></div>
+    </div>
+
+    <!-- 메인 콘텐츠 / メインコンテンツ -->
+    <div class="relative z-10 max-w-2xl mx-auto px-6 text-center">
+      <!-- 404 숫자 / 404番号 -->
+      <div class="animate-fade-in">
+        <span class="text-9xl md:text-[12rem] font-bold tracking-tight bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+          404
+        </span>
+      </div>
+
+      <!-- 에러 메시지 / エラーメッセージ -->
+      <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
+        <h1 class="mt-4 text-2xl md:text-3xl font-bold text-white">
+          Page Not Found
+        </h1>
+        <p class="mt-4 text-lg text-slate-400 leading-relaxed">
+          お探しのページは見つかりませんでした。<br />
+          ページが移動または削除された可能性があります。
+        </p>
+        <p class="mt-2 text-sm text-slate-500">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+      </div>
+
+      <!-- CTA 버튼 / CTAボタン -->
+      <div class="mt-10 animate-fade-in-up" style="animation-delay: 0.4s;">
+        <a
+          href="/"
+          class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/30 hover:-translate-y-1"
+        >
+          <!-- 아이콘 / アイコン -->
+          <svg
+            class="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            ></path>
+          </svg>
+          <span class="relative z-10">ホームへ戻る</span>
+          <!-- 호버 글로우 / ホバーグロー -->
+          <div class="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </a>
+      </div>
+
+      <!-- 추가 링크 / 追加リンク -->
+      <div class="mt-8 animate-fade-in-up" style="animation-delay: 0.6s;">
+        <p class="text-sm text-slate-500">
+          または
+          <a href="/#about" class="text-amber-400 hover:text-amber-300 underline underline-offset-4 transition-colors">
+            プロフィール
+          </a>
+          をご覧ください。
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* 페이드인 애니메이션 / フェードインアニメーション */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .animate-fade-in-up {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+</style>
