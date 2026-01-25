@@ -21,6 +21,41 @@ import Layout from "../layouts/Layout.astro";
  * - デスクトップ: フルスクリーン画像 + 左テキスト
  * - 縦画面: 画像全体表示（object-contain）
  */
+
+// ============================================================
+// 공통 텍스트 및 URL 정의 (유지보수 용이성을 위해 중앙 집중화)
+// 共通テキストとURL定義（メンテナンス性向上のため集中管理）
+// ============================================================
+const content = {
+  // 에러 정보 / エラー情報
+  errorCode: "404",
+  title: "Page Not Found",
+
+  // 메시지 (일본어) / メッセージ（日本語）
+  messageJa: "お探しのページは見つかりませんでした。",
+  messageJaDetail: "ページが移動または削除された可能性があります。",
+
+  // 메시지 (영어) / メッセージ（英語）
+  messageEn: "The page you're looking for doesn't exist or has been moved.",
+
+  // CTA 텍스트 / CTAテキスト
+  ctaHome: "ホームへ戻る",
+  ctaProfile: "プロフィール",
+  ctaOr: "または",
+  ctaSuffix: "をご覧ください。",
+
+  // URL (커스텀 도메인 적용 시 여기만 수정)
+  // URL（カスタムドメイン適用時はここだけ修正）
+  homeUrl: "https://d2opqv3ja0x6v5.cloudfront.net/",
+  profileUrl: "https://d2opqv3ja0x6v5.cloudfront.net/#about",
+
+  // 에셋 경로 / アセットパス
+  modelImage: "/assets/bizreach-404-model-grok.png",
+};
+
+// 모바일용 줄바꿈 메시지 (화면이 좁아서 줄바꿈 필요)
+// モバイル用改行メッセージ（画面が狭いため改行必要）
+const mobileMessageLines = content.messageJa.replace("は", "は\n").split("\n");
 ---
 
 <Layout title="404 - Page Not Found">
@@ -29,7 +64,7 @@ import Layout from "../layouts/Layout.astro";
     <!-- Background Image Section / 背景画像セクション -->
     <div class="relative min-h-[50vh]">
       <img
-        src="/assets/bizreach-404-model-grok.png"
+        src={content.modelImage}
         alt=""
         class="absolute inset-0 w-full h-full object-cover object-[70%_25%]"
       />
@@ -39,13 +74,13 @@ import Layout from "../layouts/Layout.astro";
       <!-- Mobile Text Content / モバイルテキストコンテンツ -->
       <div class="relative flex flex-col justify-center px-6 py-8 z-10 w-[65%] min-h-[50vh]">
         <span class="text-7xl font-bold tracking-tight bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent animate-fade-in">
-          404
+          {content.errorCode}
         </span>
         <h1 class="mt-2 text-xl font-bold text-white animate-fade-in-up" style="animation-delay: 0.2s;">
-          Page Not Found
+          {content.title}
         </h1>
         <p class="mt-3 text-sm text-slate-200 leading-relaxed animate-fade-in-up" style="animation-delay: 0.3s;">
-          お探しのページは<br />見つかりませんでした。
+          {mobileMessageLines[0]}<br />{mobileMessageLines[1]}
         </p>
       </div>
     </div>
@@ -53,16 +88,16 @@ import Layout from "../layouts/Layout.astro";
     <!-- Mobile CTA Section / モバイルCTAセクション -->
     <div class="bg-white px-6 py-6">
       <a
-        href="https://d2opqv3ja0x6v5.cloudfront.net/"
+        href={content.homeUrl}
         class="flex items-center justify-center w-full py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 transition-colors animate-fade-in-up"
         style="animation-delay: 0.4s;"
       >
-        ホームへ戻る
+        {content.ctaHome}
       </a>
       <p class="mt-4 text-center text-sm text-slate-500 animate-fade-in-up" style="animation-delay: 0.5s;">
-        または
-        <a href="https://d2opqv3ja0x6v5.cloudfront.net/#about" class="text-red-600 hover:underline">プロフィール</a>
-        をご覧ください。
+        {content.ctaOr}
+        <a href={content.profileUrl} class="text-red-600 hover:underline">{content.ctaProfile}</a>
+        {content.ctaSuffix}
       </p>
     </div>
   </div>
@@ -72,7 +107,7 @@ import Layout from "../layouts/Layout.astro";
     <!-- Background Image / 背景画像 -->
     <div class="absolute inset-0">
       <img
-        src="/assets/bizreach-404-model-grok.png"
+        src={content.modelImage}
         alt=""
         class="absolute inset-0 w-full h-full object-cover object-center portrait:object-[70%_center]"
       />
@@ -92,31 +127,31 @@ import Layout from "../layouts/Layout.astro";
       <!-- 404 Number / 404番号 -->
       <div class="animate-fade-in">
         <span class="text-9xl lg:text-[10rem] font-bold tracking-tight bg-gradient-to-r from-red-500 via-red-400 to-red-600 bg-clip-text text-transparent drop-shadow-2xl">
-          404
+          {content.errorCode}
         </span>
       </div>
 
       <!-- Error Message / エラーメッセージ -->
       <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
         <h1 class="mt-2 text-3xl font-bold text-white">
-          Page Not Found
+          {content.title}
         </h1>
         <p class="mt-4 text-lg text-slate-300 leading-relaxed">
-          お探しのページは見つかりませんでした。<br />
-          ページが移動または削除された可能性があります。
+          {content.messageJa}<br />
+          {content.messageJaDetail}
         </p>
         <p class="mt-2 text-sm text-slate-400">
-          The page you're looking for doesn't exist or has been moved.
+          {content.messageEn}
         </p>
       </div>
 
       <!-- CTA Button / CTAボタン -->
       <div class="mt-8 animate-fade-in-up" style="animation-delay: 0.4s;">
         <a
-          href="https://d2opqv3ja0x6v5.cloudfront.net/"
+          href={content.homeUrl}
           class="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/30 hover:-translate-y-1"
         >
-          <span class="relative z-10">ホームへ戻る</span>
+          <span class="relative z-10">{content.ctaHome}</span>
           <div class="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </a>
       </div>
@@ -124,11 +159,11 @@ import Layout from "../layouts/Layout.astro";
       <!-- Additional Link / 追加リンク -->
       <div class="mt-6 animate-fade-in-up" style="animation-delay: 0.6s;">
         <p class="text-sm text-slate-400">
-          または
-          <a href="https://d2opqv3ja0x6v5.cloudfront.net/#about" class="text-red-400 hover:text-red-300 underline underline-offset-4 transition-colors">
-            プロフィール
+          {content.ctaOr}
+          <a href={content.profileUrl} class="text-red-400 hover:text-red-300 underline underline-offset-4 transition-colors">
+            {content.ctaProfile}
           </a>
-          をご覧ください。
+          {content.ctaSuffix}
         </p>
       </div>
     </div>
