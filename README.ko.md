@@ -74,7 +74,10 @@
 
 ## 🌐 라이브 데모
 
-**CloudFront URL**: [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net)
+| 페이지 | URL |
+| --- | --- |
+| **메인 사이트** | [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net) |
+| **404 에러 페이지** | [https://d2opqv3ja0x6v5.cloudfront.net/404.html](https://d2opqv3ja0x6v5.cloudfront.net/404.html) |
 
 ---
 

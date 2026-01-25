@@ -74,7 +74,10 @@
 
 ## 🌐 ライブデモ
 
-**CloudFront URL**: [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net)
+| ページ | URL |
+| --- | --- |
+| **メインサイト** | [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net) |
+| **404エラーページ** | [https://d2opqv3ja0x6v5.cloudfront.net/404.html](https://d2opqv3ja0x6v5.cloudfront.net/404.html) |
 
 ---
 
