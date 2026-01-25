@@ -8,6 +8,89 @@
 
 ---
 
+## 🤖 Vibe Coding with Claude Code CLI
+
+이 프로젝트는 **Claude Code CLI**를 사용한 **Vibe Coding**으로 개발되었습니다.
+
+このプロジェクトは**Claude Code CLI**を使用した**Vibe Coding**で開発されました。
+
+### 개발 기간 / 開発期間
+
+| 항목 | 내용 |
+| --- | --- |
+| 시작일 | 2026-01-25 |
+| 완료일 | 2026-01-26 |
+| **총 소요 시간** | **약 1일** |
+
+### Claude Code 설정 / Claude Code設定
+
+#### MCP Servers
+
+| MCP Server | 용도 |
+| --- | --- |
+| `plugin:github` | GitHub 연동 (PR, Issues, Repository 관리) |
+| `plugin:playwright` | 브라우저 자동화 테스트, 스크린샷 |
+| `plugin:serena` | 코드베이스 시맨틱 검색 및 분석 |
+| `plugin:context7` | 라이브러리 문서 검색 |
+| `sequential-thinking` | 복잡한 문제 단계별 사고 |
+
+#### Skills
+
+| Skill | 용도 |
+| --- | --- |
+| `superpowers:brainstorming` | 아이디어 구체화 및 요구사항 정리 |
+| `superpowers:writing-plans` | 구현 계획 수립 |
+| `superpowers:executing-plans` | 계획 기반 단계별 구현 |
+| `frontend-design:frontend-design` | 고품질 프론트엔드 UI 개발 |
+
+#### Guardrails (rules/)
+
+| 가드레일 | 설명 |
+| --- | --- |
+| `code-style.md` | 코드 스타일 규칙 |
+| `aws-best-practices.md` | AWS 모범 사례 |
+| `security.md` | 보안 가드레일 |
+| `network-security.md` | 네트워크 보안 (OSI 7계층) |
+| `bilingual-comments.md` | 한국어/일본어 이중 주석 규칙 |
+
+### Vibe Coding 워크플로우 / Vibe Codingワークフロー
+
+```text
+1. 브레인스토밍 → requirements.md 작성
+   ブレインストーミング → requirements.md作成
+
+2. 설계 문서 작성 → docs/plans/
+   設計ドキュメント作成 → docs/plans/
+
+3. 가드레일 설정 → rules/
+   ガードレール設定 → rules/
+
+4. 인프라 구현 (CDK)
+   インフラ実装（CDK）
+
+5. 프론트엔드 개발 (Next.js + Tailwind)
+   フロントエンド開発（Next.js + Tailwind）
+
+6. CI/CD 파이프라인 구성 (GitHub Actions)
+   CI/CDパイプライン構成（GitHub Actions）
+
+7. 에러 페이지 구현 (Astro)
+   エラーページ実装（Astro）
+
+8. 리뷰 및 리팩토링
+   レビューおよびリファクタリング
+```
+
+### 주요 성과 / 主な成果
+
+- ✅ **1일 만에** AWS 인프라 + 프론트엔드 + CI/CD 완성
+- ✅ FreeTier 범위 내 비용 최적화 아키텍처
+- ✅ BizReach 스타일 반응형 디자인 (모바일/데스크톱 완전 분리)
+- ✅ 자동 배포 파이프라인 (GitHub Actions → ECR → EC2)
+- ✅ 커스텀 404 에러 페이지 (CloudFront → S3)
+
+---
+
 ## 🌐 라이브 데모 / Live Demo
 
 **CloudFront URL**: [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net)
