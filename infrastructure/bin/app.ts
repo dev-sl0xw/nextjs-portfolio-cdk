@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { VpcStack } from '../lib/vpc-stack';
 import { EcrStack } from '../lib/ecr-stack';
+import { Ec2Stack } from '../lib/ec2-stack';
 
 // 앱 인스턴스 생성
 // アプリインスタンス作成
@@ -51,8 +52,21 @@ const ecrStack = new EcrStack(app, 'EcrStack', {
   description: 'ECR repository for frontend Docker images',
 });
 
-// TODO: Ec2Stack - Task 2.4에서 추가 (vpcStack.vpc, ecrStack.repository 참조)
-// TODO: AlbStack - Task 2.5에서 추가
+// EC2 Stack (Task 2.4)
+// Next.js Docker 컨테이너 실행 서버
+// Next.js Dockerコンテナ実行サーバー
+const ec2Stack = new Ec2Stack(app, 'Ec2Stack', {
+  env,
+  projectName,
+  environment,
+  vpc: vpcStack.vpc,
+  ecrRepository: ecrStack.repository,
+  description: 'EC2 instance for running Next.js container',
+});
+ec2Stack.addDependency(vpcStack);
+ec2Stack.addDependency(ecrStack);
+
+// TODO: AlbStack - Task 2.5에서 추가 (ec2Stack.instance, ec2Stack.securityGroup 참조)
 // TODO: CloudFrontStack - Task 2.6에서 추가
 
 app.synth();
