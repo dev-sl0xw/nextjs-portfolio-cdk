@@ -4,6 +4,7 @@ import * as cdk from 'aws-cdk-lib';
 import { VpcStack } from '../lib/vpc-stack';
 import { EcrStack } from '../lib/ecr-stack';
 import { Ec2Stack } from '../lib/ec2-stack';
+import { AlbStack } from '../lib/alb-stack';
 
 // 앱 인스턴스 생성
 // アプリインスタンス作成
@@ -66,7 +67,19 @@ const ec2Stack = new Ec2Stack(app, 'Ec2Stack', {
 ec2Stack.addDependency(vpcStack);
 ec2Stack.addDependency(ecrStack);
 
-// TODO: AlbStack - Task 2.5에서 추가 (ec2Stack.instance, ec2Stack.securityGroup 참조)
-// TODO: CloudFrontStack - Task 2.6에서 추가
+// ALB Stack (Task 2.5)
+// L7 로드밸런서
+// L7ロードバランサー
+const albStack = new AlbStack(app, 'AlbStack', {
+  env,
+  projectName,
+  environment,
+  vpc: vpcStack.vpc,
+  ec2Instance: ec2Stack.instance,
+  description: 'Application Load Balancer for traffic distribution',
+});
+albStack.addDependency(ec2Stack);
+
+// TODO: CloudFrontStack - Task 2.6에서 추가 (albStack.alb 참조)
 
 app.synth();
