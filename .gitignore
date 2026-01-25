@@ -50,3 +50,6 @@ cdk.context.json
 
 # Serena
 .serena/
+
+# Error pages - prevent platform-specific lock file issues
+error-pages/package-lock.json

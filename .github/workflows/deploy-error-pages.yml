@@ -61,13 +61,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: error-pages/package-lock.json
 
       - name: Install dependencies
-        # --ignore-optional: 플랫폼별 optional 의존성 무시 (rollup-darwin 등)
-        # --ignore-optional: プラットフォーム別optional依存関係無視（rollup-darwin等）
-        run: npm install --ignore-optional
+        # package-lock.json 없이 설치 (플랫폼별 의존성 문제 방지)
+        # package-lock.jsonなしでインストール（プラットフォーム別依存関係問題防止）
+        run: npm install
 
       - name: Build Astro site
         run: npm run build
