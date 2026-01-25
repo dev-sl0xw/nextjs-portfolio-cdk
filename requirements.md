@@ -175,34 +175,80 @@ Push to main → Build Astro → Upload to S3
 
 ## 5. 프론트엔드 요구사항 / フロントエンド要件
 
-### 5.1 랜딩 페이지 구성 / ランディングページ構成
+### 5.1 컴포넌트 구성 / コンポーネント構成
 
-| 섹션 / セクション | 내용 / 内容 |
+| 컴포넌트 / コンポーネント | 내용 / 内容 |
 | --- | --- |
-| Header | 로고 |
-| Hero Section | 기업명 + 슬로건 + 영상 플레이어 |
-| About Section | 기업 소개 텍스트 |
-| Footer | 저작권 표시 |
+| `Header` | 네비게이션, 스크롤 시 블러 효과, 로고 |
+| `HeroSection` | 메인 비주얼, 모바일/데스크톱 완전 분리 레이아웃, CTA 버튼 |
+| `VideoSection` | YouTube 임베드, 반응형 16:9 비율, 스크롤 애니메이션 |
+| `CompanyLogosSection` | 기업 로고 캐러셀, 자동 슬라이드 |
+| `ValuePropositionSection` | 3가지 핵심 가치 카드, 수치 강조 |
+| `ProcessFlowSection` | 4단계 서비스 이용 플로우, 연결선 |
+| `FAQSection` | 아코디언 형태 FAQ, 펼침/접힘 애니메이션 |
+| `AboutSection` | 소개 섹션 |
+| `Footer` | 저작권 표시, 소셜 링크 |
 
-### 5.2 영상 삽입 / 動画挿入
+### 5.2 반응형 디자인 전략 / レスポンシブデザイン戦略
+
+#### 모바일/데스크톱 완전 분리 패턴 / モバイル/デスクトップ完全分離パターン
+
+```tsx
+{/* 모바일 전용 / モバイル専用 */}
+<section className="md:hidden">
+  {/* 모바일 레이아웃 */}
+</section>
+
+{/* 데스크톱 전용 / デスクトップ専用 */}
+<section className="hidden md:flex">
+  {/* 데스크톱 레이아웃 */}
+</section>
+```
+
+#### 디바이스별 테마 분기 / デバイス別テーマ分岐
+
+| 디바이스 / デバイス | 배경 / 背景 | 포인트 색상 / アクセントカラー |
+| --- | --- | --- |
+| 모바일 | 밝은 배경 (white, slate-100) | 빨간색 (red-600) |
+| 데스크톱 | 다크 배경 (slate-900, slate-950) | amber 계열 (amber-400~600) |
+
+#### 크로스 플랫폼 대응 / クロスプラットフォーム対応
+
+| 항목 / 項目 | Tailwind 수정자 / 修飾子 | 용도 / 用途 |
+| --- | --- | --- |
+| 브레이크포인트 | `md:`, `lg:` | 태블릿/데스크톱 분기 |
+| 세로 화면 대응 | `portrait:` | 세로 모드 이미지 초점 조정 |
+| 반응형 스케일 | `text-sm md:text-base` | 타이포그래피 크기 조정 |
+| 간격 조정 | `p-4 md:p-8` | 스페이싱 크기 조정 |
+
+### 5.3 애니메이션 / アニメーション
+
+| 효과 / 効果 | 구현 / 実装 |
+| --- | --- |
+| 스크롤 페이드인 | `IntersectionObserver` + CSS transition |
+| Staggered reveal | `transitionDelay` 활용 순차 등장 |
+| 호버 효과 | `group-hover:`, `hover:` 유틸리티 |
+| 버튼 인터랙션 | `hover:-translate-y-1`, `shadow` 변화 |
+
+### 5.4 영상 삽입 / 動画挿入
 
 | 항목 / 項目 | 값 / 値 |
 | --- | --- |
-| 방식 | S3 직접 호스팅 + `<video>` 태그 |
-| 길이 | 30초 ~ 1분 |
-| 용도 | 기업 광고용 영상 |
+| 방식 | YouTube iframe 임베드 |
+| 비율 | 16:9 (`aspect-video`) |
+| 반응형 | `w-full` + `aspect-video` 조합 |
 
-### 5.3 디자인 가이드 / デザインガイド
+### 5.5 디자인 가이드 / デザインガイド
 
 | 항목 / 項目 | 값 / 値 |
 | --- | --- |
 | 참고 | BizReach (https://www.bizreach.jp/) |
-| 톤 | Luxury/Refined - 고급스럽고 전문적 |
-| 색상 | 파란 계열 액센트 + 중립 배경 |
-| 폰트 | 일본어 지원 산세리프 (Noto Sans JP 등) |
-| 모션 | 페이지 로드 시 staggered reveal 애니메이션 |
+| 톤 | 하이클래스 채용 서비스 스타일 - 고급스럽고 전문적 |
+| 색상 | 모바일: red 계열 / 데스크톱: amber + 다크 배경 |
+| 폰트 | 시스템 폰트 + 일본어 지원 |
+| 모션 | 스크롤 기반 staggered reveal 애니메이션 |
 
-### 5.4 언어 / 言語
+### 5.6 언어 / 言語
 
 | 대상 / 対象 | 언어 / 言語 |
 | --- | --- |
@@ -211,9 +257,52 @@ Push to main → Build Astro → Upload to S3
 
 ---
 
-## 6. 가드레일 (rules/) / ガードレール
+## 6. 문서 규칙 / ドキュメントルール
 
-### 6.1 파일 구조 / ファイル構造
+### 6.1 README 작성 규칙 / README作成ルール
+
+| 파일 / ファイル | 언어 / 言語 | 비고 / 備考 |
+| --- | --- | --- |
+| `README.md` | 일본어 (메인) | 프로젝트 메인 README |
+| `README.ko.md` | 한국어 | 한국어 버전 |
+
+#### 상호 링크 / 相互リンク
+
+각 README 상단에 다른 언어 버전 링크 추가:
+
+```markdown
+# README.md (일본어)
+[🇰🇷 한국어](./README.ko.md)
+
+# README.ko.md (한국어)
+[🇯🇵 日本語](./README.md)
+```
+
+#### 내용 동기화 / 内容同期
+
+- 두 파일의 내용은 항상 동기화 유지
+- 한 파일 수정 시 다른 파일도 함께 수정
+- 언어 혼용 금지 (각 파일은 단일 언어로 작성)
+
+### 6.2 코드 주석 규칙 / コードコメントルール
+
+- 한국어 주석 바로 아래에 일본어 번역
+- 비즈니스 레벨 (N1~) 일본어 사용
+- 직역 금지, 자연스러운 의역 권장
+
+```typescript
+// 사용자 인증을 처리하는 함수
+// ユーザー認証を処理する関数
+function handleAuth() {
+  // ...
+}
+```
+
+---
+
+## 7. 가드레일 (rules/) / ガードレール
+
+### 7.1 파일 구조 / ファイル構造
 
 ```text
 rules/
@@ -224,7 +313,7 @@ rules/
 └── bilingual-comments.md   # 한국어/일본어 주석 규칙
 ```
 
-### 6.2 주요 규칙 / 主要ルール
+### 7.2 주요 규칙 / 主要ルール
 
 #### code-style.md
 
@@ -257,15 +346,16 @@ rules/
 
 ---
 
-## 7. 프로젝트 구조 / プロジェクト構造
+## 8. 프로젝트 구조 / プロジェクト構造
 
 ```text
 nextjs-portfolio-cdk/
-├── README.md
-├── requirements.md
+├── README.md                 # 일본어 (메인)
+├── README.ko.md              # 한국어 버전
+├── requirements.md           # 이 파일
 ├── docs/plans/
 ├── rules/
-├── infrastructure/          # CDK
+├── infrastructure/           # CDK
 │   ├── bin/
 │   └── lib/
 │       ├── vpc-stack.ts
@@ -273,10 +363,24 @@ nextjs-portfolio-cdk/
 │       ├── alb-stack.ts
 │       ├── cloudfront-stack.ts
 │       └── ecr-stack.ts
-├── frontend/                # Next.js
+├── frontend/                 # Next.js
 │   ├── Dockerfile
 │   └── src/
-├── error-pages/             # Astro
+│       ├── app/
+│       │   ├── layout.tsx
+│       │   ├── page.tsx
+│       │   └── globals.css
+│       └── components/
+│           ├── Header.tsx
+│           ├── HeroSection.tsx
+│           ├── VideoSection.tsx
+│           ├── CompanyLogosSection.tsx
+│           ├── ValuePropositionSection.tsx
+│           ├── ProcessFlowSection.tsx
+│           ├── FAQSection.tsx
+│           ├── AboutSection.tsx
+│           └── Footer.tsx
+├── error-pages/              # Astro
 │   └── src/pages/404.astro
 └── .github/workflows/
     ├── deploy-frontend.yml
@@ -285,7 +389,7 @@ nextjs-portfolio-cdk/
 
 ---
 
-## 8. 면접 후 정리 / 面接後の整理
+## 9. 면접 후 정리 / 面接後の整理
 
 - 면접 종료 후 `cdk destroy`로 모든 AWS 리소스 삭제
 - 面接終了後、`cdk destroy`で全AWSリソースを削除
