@@ -119,7 +119,7 @@ export default function HeroSection() {
             src="/bizreach-banner-model-grok.png"
             alt="ハイクラス転職サービス"
             fill
-            className="object-cover object-center portrait:object-[center_30%]"
+            className="object-cover object-center portrait:object-[70%_center]"
             priority
             sizes="100vw"
           />
