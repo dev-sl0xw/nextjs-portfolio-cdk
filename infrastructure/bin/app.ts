@@ -5,6 +5,7 @@ import { VpcStack } from '../lib/vpc-stack';
 import { EcrStack } from '../lib/ecr-stack';
 import { Ec2Stack } from '../lib/ec2-stack';
 import { AlbStack } from '../lib/alb-stack';
+import { CloudFrontStack } from '../lib/cloudfront-stack';
 
 // 앱 인스턴스 생성
 // アプリインスタンス作成
@@ -80,6 +81,16 @@ const albStack = new AlbStack(app, 'AlbStack', {
 });
 albStack.addDependency(ec2Stack);
 
-// TODO: CloudFrontStack - Task 2.6에서 추가 (albStack.alb 참조)
+// CloudFront Stack (Task 2.6)
+// 글로벌 CDN + S3 에러 페이지
+// グローバルCDN + S3エラーページ
+const cloudFrontStack = new CloudFrontStack(app, 'CloudFrontStack', {
+  env,
+  projectName,
+  environment,
+  alb: albStack.alb,
+  description: 'CloudFront CDN with S3 error pages',
+});
+cloudFrontStack.addDependency(albStack);
 
 app.synth();
