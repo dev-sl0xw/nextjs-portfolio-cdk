@@ -12,56 +12,99 @@ import Layout from "../layouts/Layout.astro";
  * CloudFrontエラー応答時にS3からサービングされる静的エラーページ
  *
  * 디자인 포인트:
- * - 모델 이미지 배경으로 사용
- * - 텍스트는 왼쪽에 배치하여 모델 얼굴 가리지 않음
- * - 레드 + 다크 테마
+ * - 모바일: 레드 그라데이션 배경 + 이미지 오버레이
+ * - 데스크톱: 전체 화면 이미지 + 왼쪽 텍스트
+ * - 세로 화면: 이미지 전체 표시 (object-contain)
  *
  * デザインポイント:
- * - モデル画像を背景に使用
- * - テキストは左側に配置してモデルの顔を隠さない
- * - レッド + ダークテーマ
+ * - モバイル: レッドグラデーション背景 + 画像オーバーレイ
+ * - デスクトップ: フルスクリーン画像 + 左テキスト
+ * - 縦画面: 画像全体表示（object-contain）
  */
 ---
 
 <Layout title="404 - Page Not Found">
-  <div class="relative min-h-screen flex items-center overflow-hidden bg-slate-950">
-    <!-- 배경 이미지 레이어 / 背景画像レイヤー -->
-    <div class="absolute inset-0">
-      <!-- 모델 이미지 / モデル画像 -->
+  <!-- Mobile Layout / モバイルレイアウト -->
+  <div class="md:hidden relative min-h-screen flex flex-col bg-slate-950">
+    <!-- Background Image Section / 背景画像セクション -->
+    <div class="relative min-h-[50vh]">
       <img
         src="/assets/bizreach-404-model-grok.png"
         alt=""
-        class="absolute inset-0 w-full h-full object-cover object-right"
+        class="absolute inset-0 w-full h-full object-cover object-[70%_25%]"
       />
+      <!-- Gradient Overlay / グラデーションオーバーレイ -->
+      <div class="absolute inset-0 bg-gradient-to-r from-red-900/90 via-red-900/60 to-transparent"></div>
 
-      <!-- 왼쪽 그라데이션 오버레이 (텍스트 가독성) / 左側グラデーションオーバーレイ -->
+      <!-- Mobile Text Content / モバイルテキストコンテンツ -->
+      <div class="relative flex flex-col justify-center px-6 py-8 z-10 w-[65%] min-h-[50vh]">
+        <span class="text-7xl font-bold tracking-tight bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent animate-fade-in">
+          404
+        </span>
+        <h1 class="mt-2 text-xl font-bold text-white animate-fade-in-up" style="animation-delay: 0.2s;">
+          Page Not Found
+        </h1>
+        <p class="mt-3 text-sm text-slate-200 leading-relaxed animate-fade-in-up" style="animation-delay: 0.3s;">
+          お探しのページは<br />見つかりませんでした。
+        </p>
+      </div>
+    </div>
+
+    <!-- Mobile CTA Section / モバイルCTAセクション -->
+    <div class="flex-1 bg-white px-6 py-8 flex flex-col justify-center">
+      <a
+        href="/"
+        class="flex items-center justify-center gap-3 w-full py-4 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 transition-colors animate-fade-in-up"
+        style="animation-delay: 0.4s;"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        ホームへ戻る
+      </a>
+      <p class="mt-4 text-center text-sm text-slate-500 animate-fade-in-up" style="animation-delay: 0.5s;">
+        または
+        <a href="/#about" class="text-red-600 hover:underline">プロフィール</a>
+        をご覧ください。
+      </p>
+    </div>
+  </div>
+
+  <!-- Desktop Layout / デスクトップレイアウト -->
+  <div class="hidden md:flex relative min-h-screen items-center overflow-hidden bg-slate-950">
+    <!-- Background Image / 背景画像 -->
+    <div class="absolute inset-0">
+      <img
+        src="/assets/bizreach-404-model-grok.png"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover object-center portrait:object-contain portrait:object-right"
+      />
+      <!-- Left Gradient Overlay / 左側グラデーションオーバーレイ -->
       <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/50 to-transparent"></div>
-
-      <!-- 하단 그라데이션 / 下部グラデーション -->
+      <!-- Bottom Gradient / 下部グラデーション -->
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-
-      <!-- 노이즈 텍스처 / ノイズテクスチャ -->
+      <!-- Noise Texture / ノイズテクスチャ -->
       <div
         class="absolute inset-0 opacity-[0.02]"
         style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);"
       ></div>
     </div>
 
-    <!-- 메인 콘텐츠 (왼쪽 정렬) / メインコンテンツ（左寄せ） -->
-    <div class="relative z-10 max-w-xl ml-8 md:ml-16 lg:ml-24 px-6">
-      <!-- 404 숫자 / 404番号 -->
+    <!-- Desktop Text Content / デスクトップテキストコンテンツ -->
+    <div class="relative z-10 max-w-xl ml-16 lg:ml-24 px-6">
+      <!-- 404 Number / 404番号 -->
       <div class="animate-fade-in">
-        <span class="text-8xl md:text-9xl lg:text-[10rem] font-bold tracking-tight bg-gradient-to-r from-red-500 via-red-400 to-red-600 bg-clip-text text-transparent drop-shadow-2xl">
+        <span class="text-9xl lg:text-[10rem] font-bold tracking-tight bg-gradient-to-r from-red-500 via-red-400 to-red-600 bg-clip-text text-transparent drop-shadow-2xl">
           404
         </span>
       </div>
 
-      <!-- 에러 메시지 / エラーメッセージ -->
+      <!-- Error Message / エラーメッセージ -->
       <div class="animate-fade-in-up" style="animation-delay: 0.2s;">
-        <h1 class="mt-2 text-2xl md:text-3xl font-bold text-white">
+        <h1 class="mt-2 text-3xl font-bold text-white">
           Page Not Found
         </h1>
-        <p class="mt-4 text-base md:text-lg text-slate-300 leading-relaxed">
+        <p class="mt-4 text-lg text-slate-300 leading-relaxed">
           お探しのページは見つかりませんでした。<br />
           ページが移動または削除された可能性があります。
         </p>
@@ -70,13 +113,12 @@ import Layout from "../layouts/Layout.astro";
         </p>
       </div>
 
-      <!-- CTA 버튼 / CTAボタン -->
+      <!-- CTA Button / CTAボタン -->
       <div class="mt-8 animate-fade-in-up" style="animation-delay: 0.4s;">
         <a
           href="/"
-          class="group relative inline-flex items-center gap-3 px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/30 hover:-translate-y-1"
+          class="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/30 hover:-translate-y-1"
         >
-          <!-- 아이콘 / アイコン -->
           <svg
             class="relative z-10 w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1"
             fill="none"
@@ -91,12 +133,11 @@ import Layout from "../layouts/Layout.astro";
             ></path>
           </svg>
           <span class="relative z-10">ホームへ戻る</span>
-          <!-- 호버 글로우 / ホバーグロー -->
           <div class="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </a>
       </div>
 
-      <!-- 추가 링크 / 追加リンク -->
+      <!-- Additional Link / 追加リンク -->
       <div class="mt-6 animate-fade-in-up" style="animation-delay: 0.6s;">
         <p class="text-sm text-slate-400">
           または
@@ -111,7 +152,7 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <style>
-  /* 페이드인 애니메이션 / フェードインアニメーション */
+  /* Fade-in Animation / フェードインアニメーション */
   @keyframes fadeIn {
     from {
       opacity: 0;
