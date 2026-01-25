@@ -1,294 +1,289 @@
-# 요구사항 정의서
-
 # 要件定義書
+
+[🇰🇷 한국어](./requirements.ko.md)
 
 ---
 
-## 1. 프로젝트 개요 / プロジェクト概要
+## 1. プロジェクト概要
 
-### 1.1 목적 / 目的
+### 1.1 目的
 
-- 면접에서 자기 어필을 위한 포트폴리오 사이트 MVP 개발
 - 面接での自己アピールのためのポートフォリオサイトMVP開発
 
-### 1.2 타겟 / ターゲット
+### 1.2 ターゲット
 
-- 타겟 기업: BizReach (https://www.bizreach.jp/)
 - ターゲット企業: BizReach (https://www.bizreach.jp/)
 
-### 1.3 개발 원칙 / 開発原則
+### 1.3 開発原則
 
-- 작고 빠르게 시작하여 점진적으로 개선
 - 小さく素早く始めて段階的に改善
-- AWS FreeTier 범위 내에서 비용 최적화
 - AWS FreeTier範囲内でコスト最適化
-- 모든 기술 선택에 대해 근거를 주석으로 명시
 - すべての技術選択について根拠をコメントで明記
 
 ---
 
-## 2. 기술 스택 / 技術スタック
+## 2. 技術スタック
 
-### 2.1 인프라 / インフラ
+### 2.1 インフラ
 
-| 구분 / 区分 | 기술 / 技術 | 버전 / バージョン |
+| 区分 | 技術 | バージョン |
 | --- | --- | --- |
 | IaC | AWS CDK | 2.x |
-| 언어 | TypeScript | 5.x |
-| 클라우드 | AWS (FreeTier) | - |
+| 言語 | TypeScript | 5.x |
+| クラウド | AWS (FreeTier) | - |
 
-### 2.2 프론트엔드 / フロントエンド
+### 2.2 フロントエンド
 
-| 구분 / 区分 | 기술 / 技術 | 용도 / 用途 |
+| 区分 | 技術 | 用途 |
 | --- | --- | --- |
-| 메인 사이트 | Next.js 14+ | 랜딩 페이지 (Docker 컨테이너) |
-| 에러 페이지 | Astro | 404 페이지 (정적 빌드) |
-| 스타일링 | Tailwind CSS | 유틸리티 기반 CSS |
-| 언어 | TypeScript | 타입 안전성 |
+| メインサイト | Next.js 14+ | ランディングページ (Dockerコンテナ) |
+| エラーページ | Astro | 404ページ (静的ビルド) |
+| スタイリング | Tailwind CSS | ユーティリティベースCSS |
+| 言語 | TypeScript | 型安全性 |
 
 ### 2.3 CI/CD
 
-| 구분 / 区分 | 기술 / 技術 |
+| 区分 | 技術 |
 | --- | --- |
-| 파이프라인 | GitHub Actions |
-| 컨테이너 레지스트리 | Amazon ECR |
+| パイプライン | GitHub Actions |
+| コンテナレジストリ | Amazon ECR |
 
 ---
 
-## 3. AWS 아키텍처 / AWSアーキテクチャ
+## 3. AWSアーキテクチャ
 
-### 3.1 네트워크 구성 / ネットワーク構成
+### 3.1 ネットワーク構成
 
 #### VPC
 
-| 항목 / 項目 | 값 / 値 | 비고 / 備考 |
+| 項目 | 値 | 備考 |
 | --- | --- | --- |
 | VPC CIDR | 10.0.0.0/16 | 65,536 IPs |
 | Public Subnet AZ-a | 10.0.1.0/24 | ALB + EC2 |
-| Public Subnet AZ-c | 10.0.2.0/24 | ALB (고가용성) |
+| Public Subnet AZ-c | 10.0.2.0/24 | ALB (高可用性) |
 
-#### 설계 결정 사항 / 設計決定事項
+#### 設計決定事項
 
-| 항목 / 項目 | 결정 / 決定 | 이유 / 理由 |
+| 項目 | 決定 | 理由 |
 | --- | --- | --- |
-| Private Subnet | ❌ 제거 | NAT Gateway 비용 절감 (~$30-45/월) |
-| NAT Gateway | ❌ 제거 | FreeTier 범위 유지 |
+| Private Subnet | ❌ 削除 | NAT Gatewayコスト削減 (~$30-45/月) |
+| NAT Gateway | ❌ 削除 | FreeTier範囲維持 |
 
-### 3.2 컴퓨팅 / コンピューティング
+### 3.2 コンピューティング
 
 #### EC2
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 인스턴스 타입 | t2.micro 또는 t3.micro (FreeTier) |
-| 배치 | Public Subnet AZ-a |
-| 실행 환경 | Docker + Next.js 컨테이너 |
+| インスタンスタイプ | t2.micro または t3.micro (FreeTier) |
+| 配置 | Public Subnet AZ-a |
+| 実行環境 | Docker + Next.jsコンテナ |
 
-#### 로드밸런서 / ロードバランサー
+#### ロードバランサー
 
-| 항목 / 項目 | 값 / 値 | 이유 / 理由 |
+| 項目 | 値 | 理由 |
 | --- | --- | --- |
-| 타입 | ALB (Application Load Balancer) | L7에서 HTTP 헤더 분석 필요 |
-| 배치 | Public Subnet (2 AZ) | AWS 요구사항: 최소 2 AZ |
+| タイプ | ALB (Application Load Balancer) | L7でHTTPヘッダー分析必要 |
+| 配置 | Public Subnet (2 AZ) | AWS要件: 最低2 AZ |
 
-### 3.3 CDN 및 스토리지 / CDNとストレージ
+### 3.3 CDNとストレージ
 
 #### CloudFront
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 도메인 | CloudFront 기본 도메인 (*.cloudfront.net) |
-| SSL/TLS | ACM 인증서 (HTTPS) |
-| Origin | ALB (메인), S3 (에러 페이지) |
-| 에러 응답 | 404 → S3의 404.html로 리다이렉트 |
+| ドメイン | CloudFrontデフォルトドメイン (*.cloudfront.net) |
+| SSL/TLS | ACM証明書 (HTTPS) |
+| Origin | ALB (メイン), S3 (エラーページ) |
+| エラー応答 | 404 → S3の404.htmlへリダイレクト |
 
 #### S3
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 용도 | 404 에러 페이지 호스팅, 영상 파일 호스팅 |
-| 접근 제어 | OAC (Origin Access Control) |
-| 퍼블릭 액세스 | 차단 (CloudFront를 통해서만 접근) |
+| 用途 | 404エラーページホスティング、動画ファイルホスティング |
+| アクセス制御 | OAC (Origin Access Control) |
+| パブリックアクセス | ブロック (CloudFront経由のみ) |
 
-### 3.4 보안 / セキュリティ
+### 3.4 セキュリティ
 
 #### Security Group (Stateful)
 
-| 대상 / 対象 | Inbound | Outbound |
+| 対象 | Inbound | Outbound |
 | --- | --- | --- |
-| ALB SG | CloudFront → 80 | 자동 허용 (Stateful) |
-| EC2 SG | ALB SG → 3000 | 자동 허용 (Stateful) |
+| ALB SG | CloudFront → 80 | 自動許可 (Stateful) |
+| EC2 SG | ALB SG → 3000 | 自動許可 (Stateful) |
 
 #### NACL (Stateless)
 
-| 방향 / 方向 | 포트 / ポート | 용도 / 用途 |
+| 方向 | ポート | 用途 |
 | --- | --- | --- |
-| Inbound | 80 | HTTP 트래픽 |
-| Outbound | 1024-65535 | Ephemeral 포트 응답 |
+| Inbound | 80 | HTTPトラフィック |
+| Outbound | 1024-65535 | Ephemeralポート応答 |
 
 #### WAF
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 적용 여부 | ❌ 문서화만 (비용 절감) |
-| 권장 사항 | 프로덕션에서는 AWSManagedRulesCommonRuleSet 적용 권장 |
+| 適用有無 | ❌ ドキュメント化のみ (コスト削減) |
+| 推奨事項 | 本番環境ではAWSManagedRulesCommonRuleSet適用推奨 |
 
-### 3.5 DNS (문서화만) / DNS（ドキュメントのみ）
+### 3.5 DNS（ドキュメントのみ）
 
 #### Route53
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 적용 여부 | ❌ 문서화만 |
-| 이유 | 면접 시연에 커스텀 도메인 불필요, 비용 절감 |
-| 권장 사항 | 프로덕션에서는 Route53 + 커스텀 도메인 적용 권장 |
+| 適用有無 | ❌ ドキュメント化のみ |
+| 理由 | 面接デモにカスタムドメイン不要、コスト削減 |
+| 推奨事項 | 本番環境ではRoute53 + カスタムドメイン適用推奨 |
 
 ---
 
-## 4. CI/CD 파이프라인 / CI/CDパイプライン
+## 4. CI/CDパイプライン
 
-### 4.1 Next.js 배포 워크플로우
+### 4.1 Next.jsデプロイワークフロー
 
 ```text
 Push to main → Test (lint, test) → Docker Build → Push to ECR → Deploy to EC2
 ```
 
-| 단계 / ステップ | 설명 / 説明 |
+| ステップ | 説明 |
 | --- | --- |
-| Test | ESLint, TypeScript 검사, 단위 테스트 |
-| Docker Build | Next.js 앱 Docker 이미지 빌드 |
-| Push to ECR | Amazon ECR에 이미지 푸시 |
-| Deploy to EC2 | SSH로 EC2 접속 → docker pull → docker run |
+| Test | ESLint, TypeScript検査、単体テスト |
+| Docker Build | Next.jsアプリDockerイメージビルド |
+| Push to ECR | Amazon ECRにイメージプッシュ |
+| Deploy to EC2 | SSHでEC2接続 → docker pull → docker run |
 
-### 4.2 Astro 배포 워크플로우
+### 4.2 Astroデプロイワークフロー
 
 ```text
 Push to main → Build Astro → Upload to S3
 ```
 
-| 단계 / ステップ | 설명 / 説明 |
+| ステップ | 説明 |
 | --- | --- |
-| Build | Astro 정적 빌드 |
-| Upload | S3 버킷에 404.html 업로드 |
+| Build | Astro静的ビルド |
+| Upload | S3バケットに404.htmlアップロード |
 
 ---
 
-## 5. 프론트엔드 요구사항 / フロントエンド要件
+## 5. フロントエンド要件
 
-### 5.1 컴포넌트 구성 / コンポーネント構成
+### 5.1 コンポーネント構成
 
-| 컴포넌트 / コンポーネント | 내용 / 内容 |
+| コンポーネント | 内容 |
 | --- | --- |
-| `Header` | 네비게이션, 스크롤 시 블러 효과, 로고 |
-| `HeroSection` | 메인 비주얼, 모바일/데스크톱 완전 분리 레이아웃, CTA 버튼 |
-| `VideoSection` | YouTube 임베드, 반응형 16:9 비율, 스크롤 애니메이션 |
-| `CompanyLogosSection` | 기업 로고 캐러셀, 자동 슬라이드 |
-| `ValuePropositionSection` | 3가지 핵심 가치 카드, 수치 강조 |
-| `ProcessFlowSection` | 4단계 서비스 이용 플로우, 연결선 |
-| `FAQSection` | 아코디언 형태 FAQ, 펼침/접힘 애니메이션 |
-| `AboutSection` | 소개 섹션 |
-| `Footer` | 저작권 표시, 소셜 링크 |
+| `Header` | ナビゲーション、スクロール時ブラー効果、ロゴ |
+| `HeroSection` | メインビジュアル、モバイル/デスクトップ完全分離レイアウト、CTAボタン |
+| `VideoSection` | YouTube埋め込み、レスポンシブ16:9比率、スクロールアニメーション |
+| `CompanyLogosSection` | 企業ロゴカルーセル、自動スライド |
+| `ValuePropositionSection` | 3つの核心価値カード、数値強調 |
+| `ProcessFlowSection` | 4段階サービス利用フロー、接続線 |
+| `FAQSection` | アコーディオン形式FAQ、展開/折りたたみアニメーション |
+| `AboutSection` | 紹介セクション |
+| `Footer` | 著作権表示、ソーシャルリンク |
 
-### 5.2 반응형 디자인 전략 / レスポンシブデザイン戦略
+### 5.2 レスポンシブデザイン戦略
 
-#### 모바일/데스크톱 완전 분리 패턴 / モバイル/デスクトップ完全分離パターン
+#### モバイル/デスクトップ完全分離パターン
 
 ```tsx
-{/* 모바일 전용 / モバイル専用 */}
+{/* モバイル専用 */}
 <section className="md:hidden">
-  {/* 모바일 레이아웃 */}
+  {/* モバイルレイアウト */}
 </section>
 
-{/* 데스크톱 전용 / デスクトップ専用 */}
+{/* デスクトップ専用 */}
 <section className="hidden md:flex">
-  {/* 데스크톱 레이아웃 */}
+  {/* デスクトップレイアウト */}
 </section>
 ```
 
-#### 디바이스별 테마 분기 / デバイス別テーマ分岐
+#### デバイス別テーマ分岐
 
-| 디바이스 / デバイス | 배경 / 背景 | 포인트 색상 / アクセントカラー |
+| デバイス | 背景 | アクセントカラー |
 | --- | --- | --- |
-| 모바일 | 밝은 배경 (white, slate-100) | 빨간색 (red-600) |
-| 데스크톱 | 다크 배경 (slate-900, slate-950) | amber 계열 (amber-400~600) |
+| モバイル | 明るい背景 (white, slate-100) | 赤色 (red-600) |
+| デスクトップ | ダーク背景 (slate-900, slate-950) | amber系 (amber-400~600) |
 
-#### 크로스 플랫폼 대응 / クロスプラットフォーム対応
+#### クロスプラットフォーム対応
 
-| 항목 / 項目 | Tailwind 수정자 / 修飾子 | 용도 / 用途 |
+| 項目 | Tailwind修飾子 | 用途 |
 | --- | --- | --- |
-| 브레이크포인트 | `md:`, `lg:` | 태블릿/데스크톱 분기 |
-| 세로 화면 대응 | `portrait:` | 세로 모드 이미지 초점 조정 |
-| 반응형 스케일 | `text-sm md:text-base` | 타이포그래피 크기 조정 |
-| 간격 조정 | `p-4 md:p-8` | 스페이싱 크기 조정 |
+| ブレークポイント | `md:`, `lg:` | タブレット/デスクトップ分岐 |
+| 縦画面対応 | `portrait:` | 縦モード画像フォーカス調整 |
+| レスポンシブスケール | `text-sm md:text-base` | タイポグラフィサイズ調整 |
+| 間隔調整 | `p-4 md:p-8` | スペーシングサイズ調整 |
 
-### 5.3 애니메이션 / アニメーション
+### 5.3 アニメーション
 
-| 효과 / 効果 | 구현 / 実装 |
+| 効果 | 実装 |
 | --- | --- |
-| 스크롤 페이드인 | `IntersectionObserver` + CSS transition |
-| Staggered reveal | `transitionDelay` 활용 순차 등장 |
-| 호버 효과 | `group-hover:`, `hover:` 유틸리티 |
-| 버튼 인터랙션 | `hover:-translate-y-1`, `shadow` 변화 |
+| スクロールフェードイン | `IntersectionObserver` + CSS transition |
+| Staggered reveal | `transitionDelay`活用順次登場 |
+| ホバー効果 | `group-hover:`, `hover:`ユーティリティ |
+| ボタンインタラクション | `hover:-translate-y-1`, `shadow`変化 |
 
-### 5.4 영상 삽입 / 動画挿入
+### 5.4 動画挿入
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 방식 | YouTube iframe 임베드 |
-| 비율 | 16:9 (`aspect-video`) |
-| 반응형 | `w-full` + `aspect-video` 조합 |
+| 方式 | YouTube iframe埋め込み |
+| 比率 | 16:9 (`aspect-video`) |
+| レスポンシブ | `w-full` + `aspect-video`組み合わせ |
 
-### 5.5 디자인 가이드 / デザインガイド
+### 5.5 デザインガイド
 
-| 항목 / 項目 | 값 / 値 |
+| 項目 | 値 |
 | --- | --- |
-| 참고 | BizReach (https://www.bizreach.jp/) |
-| 톤 | 하이클래스 채용 서비스 스타일 - 고급스럽고 전문적 |
-| 색상 | 모바일: red 계열 / 데스크톱: amber + 다크 배경 |
-| 폰트 | 시스템 폰트 + 일본어 지원 |
-| 모션 | 스크롤 기반 staggered reveal 애니메이션 |
+| 参考 | BizReach (https://www.bizreach.jp/) |
+| トーン | ハイクラス採用サービススタイル - 高級感と専門性 |
+| 色彩 | モバイル: red系 / デスクトップ: amber + ダーク背景 |
+| フォント | システムフォント + 日本語対応 |
+| モーション | スクロールベースstaggered revealアニメーション |
 
-### 5.6 언어 / 言語
+### 5.6 言語
 
-| 대상 / 対象 | 언어 / 言語 |
+| 対象 | 言語 |
 | --- | --- |
-| 랜딩 페이지 콘텐츠 | 일본어 |
-| 코드 주석 | 한국어 + 일본어 (이중 언어) |
+| ランディングページコンテンツ | 日本語 |
+| コードコメント | 韓国語 + 日本語 (バイリンガル) |
 
 ---
 
-## 6. 문서 규칙 / ドキュメントルール
+## 6. ドキュメントルール
 
-### 6.1 README 작성 규칙 / README作成ルール
+### 6.1 README作成ルール
 
-| 파일 / ファイル | 언어 / 言語 | 비고 / 備考 |
+| ファイル | 言語 | 備考 |
 | --- | --- | --- |
-| `README.md` | 일본어 (메인) | 프로젝트 메인 README |
-| `README.ko.md` | 한국어 | 한국어 버전 |
+| `README.md` | 日本語 (メイン) | プロジェクトメインREADME |
+| `README.ko.md` | 韓国語 | 韓国語版 |
 
-#### 상호 링크 / 相互リンク
+#### 相互リンク
 
-각 README 상단에 다른 언어 버전 링크 추가:
+各README上部に他言語版リンクを追加:
 
 ```markdown
-# README.md (일본어)
+# README.md (日本語)
 [🇰🇷 한국어](./README.ko.md)
 
-# README.ko.md (한국어)
+# README.ko.md (韓国語)
 [🇯🇵 日本語](./README.md)
 ```
 
-#### 내용 동기화 / 内容同期
+#### 内容同期
 
-- 두 파일의 내용은 항상 동기화 유지
-- 한 파일 수정 시 다른 파일도 함께 수정
-- 언어 혼용 금지 (각 파일은 단일 언어로 작성)
+- 両ファイルの内容は常に同期維持
+- 一方のファイル修正時、もう一方も同時修正
+- 言語混用禁止 (各ファイルは単一言語で記述)
 
-### 6.2 코드 주석 규칙 / コードコメントルール
+### 6.2 コードコメントルール
 
-- 한국어 주석 바로 아래에 일본어 번역
-- 비즈니스 레벨 (N1~) 일본어 사용
-- 직역 금지, 자연스러운 의역 권장
+- 韓国語コメントの直下に日本語翻訳
+- ビジネスレベル (N1~) 日本語使用
+- 直訳禁止、自然な意訳推奨
 
 ```typescript
 // 사용자 인증을 처리하는 함수
@@ -300,59 +295,60 @@ function handleAuth() {
 
 ---
 
-## 7. 가드레일 (rules/) / ガードレール
+## 7. ガードレール (rules/)
 
-### 7.1 파일 구조 / ファイル構造
+### 7.1 ファイル構造
 
 ```text
 rules/
-├── code-style.md           # TypeScript, 네이밍 컨벤션
-├── aws-best-practices.md   # 태그, 리소스 네이밍, 비용
-├── security.md             # 시크릿 금지, 최소 권한
-├── network-security.md     # SG/NACL, Stateful/Stateless, OSI 7계층
-└── bilingual-comments.md   # 한국어/일본어 주석 규칙
+├── code-style.md           # TypeScript, 命名規則
+├── aws-best-practices.md   # タグ、リソース命名、コスト
+├── security.md             # シークレット禁止、最小権限
+├── network-security.md     # SG/NACL, Stateful/Stateless, OSI 7層
+└── bilingual-comments.md   # 韓国語/日本語コメントルール
 ```
 
-### 7.2 주요 규칙 / 主要ルール
+### 7.2 主要ルール
 
 #### code-style.md
 
-- TypeScript strict mode 필수
-- 컴포넌트: PascalCase, 함수/변수: camelCase, 상수: UPPER_SNAKE_CASE
+- TypeScript strict mode必須
+- コンポーネント: PascalCase, 関数/変数: camelCase, 定数: UPPER_SNAKE_CASE
 
 #### aws-best-practices.md
 
-- 모든 리소스에 태그 필수 (Project, Environment, ManagedBy)
-- 기술 선택 근거를 주석으로 명시
-- FreeTier 초과 리소스 사용 시 비용 명시
+- 全リソースにタグ必須 (Project, Environment, ManagedBy)
+- 技術選択根拠をコメントで明記
+- FreeTier超過リソース使用時はコスト明記
 
 #### security.md
 
-- 하드코딩된 시크릿/API 키 절대 금지
-- .env 파일 git 커밋 금지
-- Security Group: 최소 권한 원칙
+- ハードコードされたシークレット/APIキー絶対禁止
+- .envファイルgitコミット禁止
+- Security Group: 最小権限原則
 
 #### network-security.md
 
-- OSI 7계층과 AWS 서비스 매핑 이해
-- Security Group (Stateful) vs NACL (Stateless) 구분
-- CDK 코드에 트래픽 흐름 주석 필수
+- OSI 7層とAWSサービスマッピング理解
+- Security Group (Stateful) vs NACL (Stateless) 区別
+- CDKコードにトラフィックフローコメント必須
 
 #### bilingual-comments.md
 
-- 한국어 주석 바로 아래에 일본어 번역
-- 비즈니스 레벨 (N1~) 일본어 사용
-- 직역 금지, 자연스러운 의역 권장
+- 韓国語コメントの直下に日本語翻訳
+- ビジネスレベル (N1~) 日本語使用
+- 直訳禁止、自然な意訳推奨
 
 ---
 
-## 8. 프로젝트 구조 / プロジェクト構造
+## 8. プロジェクト構造
 
 ```text
 nextjs-portfolio-cdk/
-├── README.md                 # 일본어 (메인)
-├── README.ko.md              # 한국어 버전
-├── requirements.md           # 이 파일
+├── README.md                 # 日本語 (メイン)
+├── README.ko.md              # 韓国語版
+├── requirements.md           # このファイル (日本語)
+├── requirements.ko.md        # 韓国語版
 ├── docs/plans/
 ├── rules/
 ├── infrastructure/           # CDK
@@ -389,9 +385,7 @@ nextjs-portfolio-cdk/
 
 ---
 
-## 9. 면접 후 정리 / 面接後の整理
+## 9. 面接後の整理
 
-- 면접 종료 후 `cdk destroy`로 모든 AWS 리소스 삭제
 - 面接終了後、`cdk destroy`で全AWSリソースを削除
-- 비용 발생 방지를 위해 CloudFormation 스택 완전 제거 확인
 - コスト発生防止のためCloudFormationスタック完全削除を確認
