@@ -151,6 +151,22 @@ export class CloudFrontStack extends cdk.Stack {
       // 추가 Behaviors: S3 정적 에셋
       // 追加Behaviors: S3静的アセット
       additionalBehaviors: {
+        // /404.html 에러 페이지는 S3에서 제공
+        // /404.htmlエラーページはS3から提供
+        // NOTE: errorResponses에서 /404.html을 참조하므로 이 behavior가 필요
+        // NOTE: errorResponsesで/404.htmlを参照するのでこのbehaviorが必要
+        '/404.html': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(this.errorPagesBucket),
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        // /_astro/* 에러 페이지 에셋 (Astro 빌드 출력물)
+        // /_astro/*エラーページアセット（Astroビルド出力物）
+        '/_astro/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(this.errorPagesBucket),
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
         // /assets/* 경로는 S3에서 제공
         // /assets/*パスはS3から提供
         '/assets/*': {
