@@ -1,26 +1,167 @@
-@import "tailwindcss";
+/**
+ * 글로벌 스타일시트
+ * グローバルスタイルシート
+ *
+ * BizReach 스타일 포트폴리오 사이트의 기본 스타일 정의
+ * BizReachスタイルポートフォリオサイトの基本スタイル定義
+ */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   CSS 커스텀 프로퍼티 / CSSカスタムプロパティ
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* 다크 테마 컬러 팔레트 / ダークテーマカラーパレット */
+  --color-primary: #f59e0b; /* Amber 500 */
+  --color-primary-light: #fbbf24; /* Amber 400 */
+  --color-primary-dark: #d97706; /* Amber 600 */
+
+  --color-bg-primary: #020617; /* Slate 950 */
+  --color-bg-secondary: #0f172a; /* Slate 900 */
+  --color-bg-tertiary: #1e293b; /* Slate 800 */
+
+  --color-text-primary: #f8fafc; /* Slate 50 */
+  --color-text-secondary: #94a3b8; /* Slate 400 */
+  --color-text-muted: #64748b; /* Slate 500 */
+
+  --color-border: #334155; /* Slate 700 */
+  --color-border-light: #475569; /* Slate 600 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================================
+   기본 스타일 리셋 및 설정 / 基本スタイルリセットと設定
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+  /* 스크롤 시 오프셋 (헤더 높이 고려) / スクロール時オフセット（ヘッダー高さ考慮） */
+  scroll-padding-top: 80px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   타이포그래피 / タイポグラフィ
+   ============================================================ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================
+   커스텀 스크롤바 / カスタムスクロールバー
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
+}
+
+/* ============================================================
+   선택 영역 스타일 / 選択範囲スタイル
+   ============================================================ */
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-bg-primary);
+}
+
+/* ============================================================
+   포커스 스타일 / フォーカススタイル
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   링크 기본 스타일 / リンク基本スタイル
+   ============================================================ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ============================================================
+   이미지 기본 스타일 / 画像基本スタイル
+   ============================================================ */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ============================================================
+   그라데이션 텍스트 유틸리티 / グラデーションテキストユーティリティ
+   ============================================================ */
+.text-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    var(--color-primary-dark)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   글래스모피즘 효과 / グラスモーフィズム効果
+   ============================================================ */
+.glass {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* ============================================================
+   호버 글로우 효과 / ホバーグロー効果
+   ============================================================ */
+.hover-glow {
+  position: relative;
+}
+
+.hover-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
+  opacity: 0;
+  z-index: -1;
+  filter: blur(12px);
+  transition: opacity 0.3s ease;
+}
+
+.hover-glow:hover::before {
+  opacity: 0.4;
 }
