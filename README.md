@@ -8,6 +8,12 @@
 
 ---
 
+## 🌐 라이브 데모 / Live Demo
+
+**CloudFront URL**: [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net)
+
+---
+
 ## 아키텍처 / アーキテクチャ
 
 ```text
@@ -41,16 +47,19 @@
 │  │ │ ALB  │ │              │              │ │ ALB  │ │      │
 │  │ └──────┘ │              │              │ └──────┘ │      │
 │  │    │     │              │              │          │      │
-│  │    ▼     │              │              │          │      │
-│  │ ┌──────┐ │              │              │          │      │
-│  │ │ EC2  │ │              │              │          │      │  ┌─────────┐
-│  │ │t2.mic│ │              │              │          │      │  │   S3    │
-│  │ │Docker│ │              │              │          │      │  │ (404    │
-│  │ │Next. │ │              │              │          │      │  │  page)  │
-│  │ │ js   │ │              │              │          │      │  │ + OAC   │
-│  │ └──────┘ │              │              │          │      │  └─────────┘
-│  └──────────┘              │              └──────────┘      │
-└─────────────────────────────────────────────────────────────┘
+│  │    ▼     │              │              │          │      │  ┌─────────┐
+│  │ ┌──────┐ │              │              │          │      │  │   S3    │
+│  │ │ EC2  │ │◄─────────────┼──────────────┼──────────┼──────┼──│ (404    │
+│  │ │t2.mic│ │              │              │          │      │  │  page)  │
+│  │ │Docker│ │              │              │          │      │  │ + OAC   │
+│  │ │Next. │ │              │              │          │      │  └─────────┘
+│  │ │ js   │ │              │              │          │      │
+│  │ └──────┘ │              │              │          │      │  ┌─────────┐
+│  │    │     │              │              │          │      │  │  SSM    │
+│  │    └─────┼──────────────┼──────────────┼──────────┼──────┼─▶│Parameter│
+│  │          │              │              │          │      │  │ Store   │
+│  └──────────┘              │              └──────────┘      │  │(API키등)│
+└─────────────────────────────────────────────────────────────┘  └─────────┘
 ```
 
 ---
@@ -72,10 +81,32 @@
 
 | 구분 | 기술 |
 | --- | --- |
-| 메인 사이트 | Next.js 14+ |
+| 프레임워크 | Next.js 14+ (App Router) |
 | 에러 페이지 | Astro |
 | 스타일링 | Tailwind CSS |
 | 언어 | TypeScript |
+| 디자인 | BizReach 스타일 반응형 디자인 |
+
+### 프론트엔드 컴포넌트 / フロントエンドコンポーネント
+
+| 컴포넌트 | 설명 |
+| --- | --- |
+| `Header` | 네비게이션, 스크롤 시 블러 효과 |
+| `HeroSection` | 메인 비주얼, 모바일/데스크톱 완전 분리 레이아웃 |
+| `VideoSection` | YouTube 임베드, 반응형 16:9 비율 |
+| `CompanyLogosSection` | 기업 로고 캐러셀 |
+| `ValuePropositionSection` | 가치 제안 카드 그리드 |
+| `ProcessFlowSection` | 4단계 프로세스 플로우 |
+| `FAQSection` | 아코디언 형태 FAQ |
+| `AboutSection` | 소개 섹션 |
+| `Footer` | 푸터, 소셜 링크 |
+
+### 반응형 디자인 특징 / レスポンシブデザイン特徴
+
+- **모바일/데스크톱 완전 분리**: `md:hidden` / `hidden md:flex` 패턴
+- **디바이스별 테마 분기**: 모바일(밝은 배경 + 빨간색) / 데스크톱(다크 + amber)
+- **세로 화면 대응**: `portrait:` 수정자로 이미지 초점 조정
+- **반응형 스케일**: 타이포그래피, 스페이싱, 아이콘 크기 일관된 비율
 
 ### CI/CD
 
@@ -94,6 +125,10 @@ nextjs-portfolio-cdk/
 ├── README.md                 # 이 파일 / このファイル
 ├── requirements.md           # 요구사항 정의서 / 要件定義書
 │
+├── .claude/
+│   └── skills/               # Claude Code 스킬 / スキル
+│       └── frontend-design.md
+│
 ├── docs/
 │   └── plans/                # 설계 문서 / 設計ドキュメント
 │
@@ -105,6 +140,7 @@ nextjs-portfolio-cdk/
 │   └── bilingual-comments.md
 │
 ├── infrastructure/           # AWS CDK 코드 / AWS CDKコード
+│   ├── README.md
 │   ├── bin/
 │   │   └── app.ts
 │   └── lib/
@@ -115,11 +151,24 @@ nextjs-portfolio-cdk/
 │       └── ecr-stack.ts
 │
 ├── frontend/                 # Next.js 앱 / Next.jsアプリ
+│   ├── README.md
 │   ├── package.json
 │   ├── Dockerfile
 │   └── src/
 │       ├── app/
+│       │   ├── layout.tsx
+│       │   ├── page.tsx
+│       │   └── globals.css
 │       └── components/
+│           ├── Header.tsx
+│           ├── HeroSection.tsx
+│           ├── VideoSection.tsx
+│           ├── CompanyLogosSection.tsx
+│           ├── ValuePropositionSection.tsx
+│           ├── ProcessFlowSection.tsx
+│           ├── FAQSection.tsx
+│           ├── AboutSection.tsx
+│           └── Footer.tsx
 │
 ├── error-pages/              # Astro 404 페이지 / Astro 404ページ
 │   └── src/
@@ -222,6 +271,97 @@ npm run dev
 # 모든 스택 삭제 / 全スタック削除
 cd infrastructure
 cdk destroy --all
+```
+
+---
+
+## 시크릿 관리 / シークレット管理
+
+이 프로젝트는 AWS Systems Manager Parameter Store를 활용하여 민감한 정보를 관리합니다.
+
+このプロジェクトはAWS Systems Manager Parameter Storeを活用して機密情報を管理します。
+
+### 왜 Parameter Store인가? / なぜParameter Storeなのか？
+
+| 서비스 | Free Tier | 용도 |
+| --- | --- | --- |
+| **Parameter Store** | ✅ 무료 (Standard) | 환경변수, API 키 |
+| Secrets Manager | ❌ 유료 ($0.40/시크릿/월) | 자동 로테이션 필요 시 |
+
+Parameter Store의 **SecureString** 타입은 KMS로 암호화되어 Secrets Manager와 유사한 보안 수준을 제공합니다.
+
+Parameter Storeの**SecureString**タイプはKMSで暗号化され、Secrets Managerと同様のセキュリティレベルを提供します。
+
+### 현재 상태 / 現在の状態
+
+현재 MVP는 정적 포트폴리오 사이트로, Parameter Store가 필수는 아닙니다.
+
+現在のMVPは静的ポートフォリオサイトであり、Parameter Storeは必須ではありません。
+
+### 서비스 확장 시 활용 시나리오 / サービス拡張時の活用シナリオ
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  확장 기능                    │  Parameter Store 활용           │
+├─────────────────────────────────────────────────────────────────┤
+│  컨택트 폼 (문의 양식)        │  이메일 서비스 API 키            │
+│  방문자 분석                  │  Google Analytics API 키        │
+│  CMS 연동                     │  Contentful/Strapi API 키       │
+│  데이터베이스 연결            │  RDS 접속 정보                  │
+│  영상 스트리밍                │  S3 Presigned URL 설정          │
+│  OAuth 인증                   │  Client ID/Secret               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 파라미터 네이밍 규칙 / パラメータ命名規則
+
+```text
+/portfolio/{environment}/{service}/{key}
+
+예시 / 例:
+/portfolio/prod/analytics/api-key
+/portfolio/prod/email/sendgrid-key
+/portfolio/dev/database/connection-string
+```
+
+### CDK 구현 예시 / CDK実装例
+
+```typescript
+import * as ssm from 'aws-cdk-lib/aws-ssm';
+
+// 일반 설정값 (String)
+// 一般設定値 (String)
+new ssm.StringParameter(this, 'ApiEndpoint', {
+  parameterName: '/portfolio/prod/api/endpoint',
+  stringValue: 'https://api.example.com',
+  description: 'API 엔드포인트 / APIエンドポイント',
+});
+
+// 민감한 정보 (SecureString - KMS 암호화)
+// 機密情報 (SecureString - KMS暗号化)
+new ssm.StringParameter(this, 'AnalyticsKey', {
+  parameterName: '/portfolio/prod/analytics/api-key',
+  stringValue: 'your-api-key',
+  type: ssm.ParameterType.SECURE_STRING,
+  description: 'Analytics API 키 / Analytics APIキー',
+});
+```
+
+### EC2에서 파라미터 조회 / EC2からパラメータ取得
+
+```typescript
+// Next.js API Route 또는 서버 컴포넌트에서
+// Next.js API Routeまたはサーバーコンポーネントで
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+
+const client = new SSMClient({ region: 'ap-northeast-1' });
+
+const response = await client.send(new GetParameterCommand({
+  Name: '/portfolio/prod/analytics/api-key',
+  WithDecryption: true,  // SecureString 복호화 / SecureString復号化
+}));
+
+const apiKey = response.Parameter?.Value;
 ```
 
 ---

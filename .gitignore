@@ -44,3 +44,9 @@ cdk.context.json
 
 # AWS
 .aws-sam/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Serena
+.serena/
