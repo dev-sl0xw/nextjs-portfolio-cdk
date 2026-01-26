@@ -7,6 +7,9 @@ import { Ec2Stack } from '../lib/ec2-stack';
 import { AlbStack } from '../lib/alb-stack';
 import { CertificateStack } from '../lib/certificate-stack';
 import { CloudFrontStack } from '../lib/cloudfront-stack';
+import { CognitoStack } from '../lib/cognito-stack';
+import { RdsStack } from '../lib/rds-stack';
+import { ProfileBucketStack } from '../lib/profile-bucket-stack';
 
 // 앱 인스턴스 생성
 // アプリインスタンス作成
@@ -116,5 +119,39 @@ const cloudFrontStack = new CloudFrontStack(app, 'CloudFrontStack', {
 });
 cloudFrontStack.addDependency(albStack);
 cloudFrontStack.addDependency(certificateStack);
+
+// Cognito Stack
+// 사용자 인증 관리 (50,000 MAU 무료)
+// ユーザー認証管理（50,000 MAU無料）
+const cognitoStack = new CognitoStack(app, 'CognitoStack', {
+  env,
+  projectName,
+  environment,
+  description: 'Cognito User Pool for authentication',
+});
+
+// RDS Stack
+// PostgreSQL 데이터베이스 (db.t3.micro FreeTier)
+// PostgreSQLデータベース（db.t3.micro FreeTier）
+const rdsStack = new RdsStack(app, 'RdsStack', {
+  env,
+  projectName,
+  environment,
+  vpc: vpcStack.vpc,
+  ec2SecurityGroup: ec2Stack.securityGroup,
+  description: 'RDS PostgreSQL database',
+});
+rdsStack.addDependency(vpcStack);
+rdsStack.addDependency(ec2Stack);
+
+// Profile Bucket Stack
+// 프로필 이미지 S3 버킷
+// プロフィール画像S3バケット
+const profileBucketStack = new ProfileBucketStack(app, 'ProfileBucketStack', {
+  env,
+  projectName,
+  environment,
+  description: 'S3 bucket for profile images',
+});
 
 app.synth();
