@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as s3 from 'aws-cdk-lib/aws-s3';
@@ -13,6 +14,10 @@ export interface CloudFrontStackProps extends cdk.StackProps {
   readonly projectName: string;
   readonly environment: string;
   readonly alb: elbv2.IApplicationLoadBalancer;
+  /** 커스텀 도메인 (선택사항) / カスタムドメイン（オプション） */
+  readonly domainName?: string;
+  /** ACM 인증서 (domainName 설정 시 필수) / ACM証明書（domainName設定時に必須） */
+  readonly certificate?: acm.ICertificate;
 }
 
 /**
