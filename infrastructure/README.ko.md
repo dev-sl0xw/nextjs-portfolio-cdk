@@ -1,21 +1,21 @@
-# インフラストラクチャ（AWS CDK）
+# 인프라스트럭처 (AWS CDK)
 
-[🇰🇷 한국어](./README.ko.md)
+[🇯🇵 日本語](./README.md)
 
-AWS CDKを使用したポートフォリオサイトインフラコードです。
+AWS CDK를 사용한 포트폴리오 사이트 인프라 코드입니다.
 
 ---
 
-## 🌐 デプロイURL
+## 🌐 배포 URL
 
-| ドメイン | URL |
+| 도메인 | URL |
 | --- | --- |
 | **Custom Domain** | [https://vibe.er.ht](https://vibe.er.ht) |
 | **CloudFront** | [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net) |
 
 ---
 
-## スタック構成
+## 스택 구성
 
 ```text
 ┌───────────────────────────────────────────────────────────────────────────────┐
@@ -27,7 +27,7 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 │  │              │    │              │    │  Stack       │    │  Stack       │ │
 │  │ - VPC        │    │ - ALB        │    │ - CloudFront │    │ (us-east-1)  │ │
 │  │ - Subnets    │    │ - Target Grp │    │ - S3 Bucket  │    │ - ACM Cert   │ │
-│  │ - IGW        │    │ - Security   │    │ - OAC        │    │   (DNS検証)   │ │
+│  │ - IGW        │    │ - Security   │    │ - OAC        │    │   (DNS검증)   │ │
 │  └──────────────┘    │   Group      │    │ - Custom Dom │    └──────────────┘ │
 │         │            └──────────────┘    └──────────────┘                     │
 │         │                   │                   ▲                              │
@@ -53,9 +53,9 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 
 ---
 
-## スタック詳細
+## 스택 상세
 
-| スタック | ファイル | リージョン | リソース |
+| 스택 | 파일 | 리전 | 리소스 |
 | --- | --- | --- | --- |
 | **VPC Stack** | `lib/vpc-stack.ts` | ap-northeast-1 | VPC, Public Subnets (2 AZ), Internet Gateway |
 | **EC2 Stack** | `lib/ec2-stack.ts` | ap-northeast-1 | EC2 (t2.micro), Security Group, IAM Role, User Data |
@@ -69,123 +69,123 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 
 ---
 
-## 主要設計決定
+## 주요 설계 결정
 
-### 1. Public Subnet Only (NAT Gateway削除)
+### 1. Public Subnet Only (NAT Gateway 제거)
 
 ```text
-コスト削減: ~$30-45/月削減
+비용 절감: ~$30-45/월 절감
 ```
 
-- EC2をPublic Subnetに配置
-- Internet Gatewayを通じた直接インターネット接続
-- セキュリティグループでインバウンドトラフィック制御
+- EC2를 Public Subnet에 배치
+- Internet Gateway를 통한 직접 인터넷 접속
+- 보안 그룹으로 인바운드 트래픽 제어
 
-### 2. CloudFront + ALB + Custom Domain構造
+### 2. CloudFront + ALB + Custom Domain 구조
 
 ```text
 User → vibe.er.ht → CloudFront (HTTPS/ACM) → ALB (HTTP) → EC2
 ```
 
-- CloudFrontでHTTPS終端（ACM証明書）
-- ALB-EC2区間はHTTP（コスト削減）
-- カスタムドメイン: `vibe.er.ht`
-- ACM証明書: us-east-1リージョン（CloudFront必須）
-- DNS検証方式使用（外部DNS管理者にCNAME追加）
+- CloudFront에서 HTTPS 종료 (ACM 인증서)
+- ALB-EC2 구간은 HTTP (비용 절감)
+- 커스텀 도메인: `vibe.er.ht`
+- ACM 인증서: us-east-1 리전 (CloudFront 필수)
+- DNS 검증 방식 사용 (외부 DNS 관리자에게 CNAME 추가)
 
 ### 3. S3 Origin Access Control (OAC)
 
-- S3バケットパブリックアクセス完全ブロック
-- CloudFrontを通じてのみアクセス可能
-- エラーページおよび静的アセットホスティング
+- S3 버킷 퍼블릭 액세스 완전 차단
+- CloudFront를 통해서만 접근 가능
+- 에러 페이지 및 정적 에셋 호스팅
 
-### 4. Cognito認証
+### 4. Cognito 인증
 
 ```text
-選択理由: 50,000 MAU無料（FreeTier永久）
+선택 이유: 50,000 MAU 무료 (FreeTier 영구)
 ```
 
-- User Pool: メールベースログイン
-- OAuth 2.0 / OIDC標準サポート
-- SRP (Secure Remote Password) 認証
-- カスタム属性: userType (jobseeker/company)
+- User Pool: 이메일 기반 로그인
+- OAuth 2.0 / OIDC 표준 지원
+- SRP (Secure Remote Password) 인증
+- 커스텀 속성: userType (jobseeker/company)
 
 ### 5. RDS PostgreSQL
 
 ```text
-コスト最適化: Public Subnet配置（NAT Gatewayコスト削減）
+비용 최적화: Public Subnet 배치 (NAT Gateway 비용 절감)
 ```
 
-- db.t3.micro: FreeTier対象（750時間/月）
-- PostgreSQL 15（LTS、安定性）
-- Secrets Manager: 認証情報自動生成および管理
-- Security Group: EC2からのみアクセス許可
+- db.t3.micro: FreeTier 대상 (750시간/월)
+- PostgreSQL 15 (LTS, 안정성)
+- Secrets Manager: 인증정보 자동 생성 및 관리
+- Security Group: EC2에서만 접근 허용
 
-### 6. プロフィール画像S3
+### 6. 프로필 이미지 S3
 
 ```text
-二元化戦略:
-- 求職者: Presigned URLで動的アップロード
-- 企業ロゴ: GitHub Actionsで静的デプロイ
+이원화 전략:
+- 구직자: Presigned URL로 동적 업로드
+- 기업 로고: GitHub Actions로 정적 배포
 ```
 
-- パブリックアクセス完全ブロック
-- CloudFront OACを通じた読み取り専用アクセス
-- Presigned URL（5分有効期限）でアップロード
+- 퍼블릭 액세스 완전 차단
+- CloudFront OAC를 통한 읽기 전용 접근
+- Presigned URL (5분 만료)로 업로드
 
-### 7. MVP vs Production構成
+### 7. MVP vs Production 구성
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  MVP（現在）                        │  Production推奨                    │
+│  MVP (현재)                         │  Production 권장                   │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  RDS: Public Subnet（単一AZ）       │  RDS: Private Subnet（Multi-AZ）   │
-│  RDS Failover: なし                 │  RDS Failover: 自動（1-2分）        │
-│  Read Replica: なし                 │  Read Replica: 読み取り分散推奨    │
-│  NAT Gateway: なし（コスト削減）    │  NAT Gateway: 必須（~$30-45/月）   │
-│  サブネット: 10.0.1.0/24, 10.0.2.0/24│  +10.0.11.0/24, 10.0.21.0/24 (DB) │
-│  WAF: なし                          │  AWSManagedRulesCommonRuleSet      │
-│  バックアップ: 7日                  │  バックアップ: 30日 + クロスリージョン │
+│  RDS: Public Subnet (단일 AZ)       │  RDS: Private Subnet (Multi-AZ)   │
+│  RDS Failover: 없음                 │  RDS Failover: 자동 (1-2분)        │
+│  Read Replica: 없음                 │  Read Replica: 읽기 분산 권장      │
+│  NAT Gateway: 없음 (비용 절감)      │  NAT Gateway: 필수 (~$30-45/월)   │
+│  서브넷: 10.0.1.0/24, 10.0.2.0/24   │  +10.0.11.0/24, 10.0.21.0/24 (DB) │
+│  WAF: 없음                          │  AWSManagedRulesCommonRuleSet      │
+│  백업: 7일                          │  백업: 30일 + 크로스 리전          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-> ⚠️ 現在のRDS Public Subnet配置はコスト最適化選択であり、Security GroupでEC2からのみアクセス許可
+> ⚠️ 현재 RDS Public Subnet 배치는 비용 최적화 선택이며, Security Group으로 EC2에서만 접근 허용
 
 ---
 
-## コマンド
+## 명령어
 
 ```bash
-# 依存関係インストール
+# 의존성 설치
 npm install
 
-# TypeScriptコンパイル
+# TypeScript 컴파일
 npm run build
 
-# 変更検知コンパイル
+# 변경 감지 컴파일
 npm run watch
 
-# ユニットテスト
+# 유닛 테스트
 npm run test
 
-# CloudFormationテンプレート生成
+# CloudFormation 템플릿 생성
 npx cdk synth
 
-# デプロイ状態比較
+# 배포 상태 비교
 npx cdk diff
 
-# 全スタックデプロイ
+# 전체 스택 배포
 npx cdk deploy --all
 
-# 全スタック削除
+# 전체 스택 삭제
 npx cdk destroy --all
 ```
 
 ---
 
-## 環境設定
+## 환경 설정
 
-### cdk.json主要設定
+### cdk.json 주요 설정
 
 ```json
 {
@@ -197,7 +197,7 @@ npx cdk destroy --all
 }
 ```
 
-### 環境変数 (bin/app.ts)
+### 환경 변수 (bin/app.ts)
 
 ```typescript
 const projectName = 'portfolio';
@@ -206,53 +206,53 @@ const environment = 'dev';
 
 ---
 
-## 出力値
+## 출력값
 
-デプロイ後、以下の出力値を確認できます:
+배포 후 다음 출력값을 확인할 수 있습니다:
 
-| 出力 | 説明 |
+| 출력 | 설명 |
 | --- | --- |
-| `CustomDomainUrl` | カスタムドメインURL (https://vibe.er.ht) |
-| `DistributionDomainName` | CloudFrontドメイン（接続URL） |
+| `CustomDomainUrl` | 커스텀 도메인 URL (https://vibe.er.ht) |
+| `DistributionDomainName` | CloudFront 도메인 (접속 URL) |
 | `DistributionId` | CloudFront Distribution ID |
-| `CertificateArn` | ACM証明書ARN (us-east-1) |
-| `ErrorPagesBucketName` | S3エラーページバケット名 |
-| `AlbDnsName` | ALB DNS名 |
-| `EcrRepositoryUri` | ECRリポジトリURI |
+| `CertificateArn` | ACM 인증서 ARN (us-east-1) |
+| `ErrorPagesBucketName` | S3 에러 페이지 버킷명 |
+| `AlbDnsName` | ALB DNS 이름 |
+| `EcrRepositoryUri` | ECR 리포지토리 URI |
 | `UserPoolId` | Cognito User Pool ID |
 | `UserPoolClientId` | Cognito User Pool Client ID |
-| `RdsEndpoint` | RDS PostgreSQLエンドポイント |
-| `RdsSecretArn` | RDS認証情報Secrets Manager ARN |
-| `ProfileBucketName` | S3プロフィール画像バケット名 |
+| `RdsEndpoint` | RDS PostgreSQL 엔드포인트 |
+| `RdsSecretArn` | RDS 인증정보 Secrets Manager ARN |
+| `ProfileBucketName` | S3 프로필 이미지 버킷명 |
 
 ---
 
-## ディレクトリ構造
+## 디렉토리 구조
 
 ```text
 infrastructure/
-├── README.md           # このファイル
-├── README.ko.md        # 韓国語版
+├── README.md           # 일본어 버전
+├── README.ko.md        # 이 파일
 ├── package.json
-├── cdk.json            # CDK設定
+├── cdk.json            # CDK 설정
 ├── tsconfig.json
 ├── bin/
-│   └── app.ts          # CDK Appエントリーポイント
+│   └── app.ts          # CDK App 엔트리포인트
 └── lib/
-    ├── vpc-stack.ts             # VPCスタック
-    ├── ec2-stack.ts             # EC2スタック
-    ├── alb-stack.ts             # ALBスタック
-    ├── certificate-stack.ts     # ACM証明書 (us-east-1)
-    ├── cloudfront-stack.ts      # CloudFrontスタック
-    ├── ecr-stack.ts             # ECRスタック
-    ├── cognito-stack.ts         # Cognito認証スタック
-    ├── rds-stack.ts             # RDS PostgreSQLスタック
-    └── profile-bucket-stack.ts  # プロフィール画像S3スタック
+    ├── vpc-stack.ts             # VPC 스택
+    ├── ec2-stack.ts             # EC2 스택
+    ├── alb-stack.ts             # ALB 스택
+    ├── certificate-stack.ts     # ACM 인증서 (us-east-1)
+    ├── cloudfront-stack.ts      # CloudFront 스택
+    ├── ecr-stack.ts             # ECR 스택
+    ├── cognito-stack.ts         # Cognito 인증 스택
+    ├── rds-stack.ts             # RDS PostgreSQL 스택
+    └── profile-bucket-stack.ts  # 프로필 이미지 S3 스택
 ```
 
 ---
 
-## 参考ドキュメント
+## 참고 문서
 
 - [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 - [AWS CDK API Reference](https://docs.aws.amazon.com/cdk/api/v2/)

@@ -1,92 +1,91 @@
-# Error Pages (Astro)
-
 # エラーページ（Astro）
 
-CloudFront에서 제공되는 커스텀 에러 페이지입니다.
+[🇰🇷 한국어](./README.ko.md)
 
 CloudFrontから提供されるカスタムエラーページです。
 
 ---
 
-## 🌐 배포 위치 / デプロイ先
+## 🌐 デプロイ先
 
-S3 버킷 → CloudFront → [https://d2opqv3ja0x6v5.cloudfront.net/404.html](https://d2opqv3ja0x6v5.cloudfront.net/404.html)
+S3バケット → CloudFront → [https://d2opqv3ja0x6v5.cloudfront.net/404.html](https://d2opqv3ja0x6v5.cloudfront.net/404.html)
 
 ---
 
-## 기술 스택 / 技術スタック
+## 技術スタック
 
-| 구분 | 기술 |
+| 区分 | 技術 |
 | --- | --- |
-| 프레임워크 | Astro |
-| 스타일링 | Tailwind CSS |
-| 배포 | S3 + CloudFront |
+| フレームワーク | Astro |
+| スタイリング | Tailwind CSS |
+| デプロイ | S3 + CloudFront |
 
 ---
 
-## 에러 페이지 목록 / エラーページ一覧
+## エラーページ一覧
 
-| 페이지 | 설명 |
+| ページ | 説明 |
 | --- | --- |
-| `404.astro` | 페이지를 찾을 수 없음 (Not Found) |
+| `404.astro` | ページが見つかりません (Not Found) |
 
 ---
 
-## 빌드 및 배포 / ビルドとデプロイ
+## ビルドとデプロイ
 
 ```bash
-# 의존성 설치 / 依存関係インストール
+# 依存関係インストール
 npm install
 
-# 개발 서버 실행 / 開発サーバー起動
+# 開発サーバー起動
 npm run dev
 
-# 빌드 / ビルド
+# ビルド
 npm run build
 
-# 빌드 결과물 미리보기 / ビルド結果プレビュー
+# ビルド結果プレビュー
 npm run preview
 ```
 
-### S3 배포 (수동)
+### S3デプロイ（手動）
 
 ```bash
-# 빌드
+# ビルド
 npm run build
 
-# S3에 업로드 (버킷명 확인 필요)
+# S3にアップロード（バケット名確認必要）
 aws s3 sync dist/ s3://portfolio-dev-error-pages-{ACCOUNT_ID}/ --delete
 ```
 
-### GitHub Actions (자동)
+### GitHub Actions（自動）
 
-`.github/workflows/deploy-error-pages.yml`로 자동 배포됩니다.
+`.github/workflows/deploy-error-pages.yml`で自動デプロイされます。
 
 ---
 
-## 디렉토리 구조 / ディレクトリ構造
+## ディレクトリ構造
 
 ```text
 error-pages/
-├── README.md           # 이 파일 / このファイル
+├── README.md           # このファイル
+├── README.ko.md        # 韓国語版
 ├── package.json
-├── astro.config.mjs    # Astro 설정
-├── tailwind.config.mjs # Tailwind 설정
+├── astro.config.mjs    # Astro設定
+├── tailwind.config.mjs # Tailwind設定
 ├── tsconfig.json
-├── public/             # 정적 에셋
+├── public/             # 静的アセット
 ├── src/
 │   └── pages/
-│       └── 404.astro   # 404 에러 페이지
-└── dist/               # 빌드 출력
+│       └── 404.astro   # 404エラーページ
+└── dist/               # ビルド出力
     ├── 404.html
-    └── _astro/         # 번들된 CSS/JS
+    └── _astro/         # バンドルされたCSS/JS
 ```
 
 ---
 
-## CloudFront 연동 / CloudFront連携
+## CloudFront連携
 
-CloudFront에서 다음과 같이 에러 응답이 설정되어 있습니다:
+CloudFrontで以下のようにエラー応答が設定されています:
 
 ```text
 HTTP 404 → /404.html (S3)
@@ -95,15 +94,15 @@ HTTP 403 → /404.html (S3)
 
 ### CloudFront Behaviors
 
-| 경로 | Origin |
+| パス | Origin |
 | --- | --- |
 | `/404.html` | S3 (Error Pages Bucket) |
 | `/_astro/*` | S3 (Error Pages Bucket) |
-| `/*` (기본) | ALB (Next.js) |
+| `/*` (デフォルト) | ALB (Next.js) |
 
 ---
 
-## 참고 문서 / 参考ドキュメント
+## 参考ドキュメント
 
 - [Astro Documentation](https://docs.astro.build/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)

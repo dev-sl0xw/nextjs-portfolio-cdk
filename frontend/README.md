@@ -1,171 +1,170 @@
-# Frontend (Next.js)
-
 # フロントエンド（Next.js）
 
-BizReach 스타일의 반응형 포트폴리오 사이트입니다.
+[🇰🇷 한국어](./README.ko.md)
 
 BizReachスタイルのレスポンシブポートフォリオサイトです。
 
 ---
 
-## 🌐 라이브 데모 / Live Demo
+## 🌐 ライブデモ
 
 **CloudFront URL**: [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net)
 
 ---
 
-## 기술 스택 / 技術スタック
+## 技術スタック
 
-| 구분 | 기술 |
+| 区分 | 技術 |
 | --- | --- |
-| 프레임워크 | Next.js 14+ (App Router) |
-| 언어 | TypeScript |
-| 스타일링 | Tailwind CSS |
-| 폰트 | Inter (Google Fonts) |
-| 배포 | Docker + EC2 + CloudFront |
+| フレームワーク | Next.js 14+ (App Router) |
+| 言語 | TypeScript |
+| スタイリング | Tailwind CSS |
+| フォント | Inter (Google Fonts) |
+| デプロイ | Docker + EC2 + CloudFront |
 
 ---
 
-## 컴포넌트 구조 / コンポーネント構造
+## コンポーネント構造
 
 ```text
 src/
 ├── app/
-│   ├── layout.tsx      # 루트 레이아웃 (메타데이터, 폰트)
-│   ├── page.tsx        # 메인 페이지
-│   ├── globals.css     # 글로벌 스타일 (CSS 변수, 유틸리티)
+│   ├── layout.tsx      # ルートレイアウト（メタデータ、フォント）
+│   ├── page.tsx        # メインページ
+│   ├── globals.css     # グローバルスタイル（CSS変数、ユーティリティ）
 │   └── favicon.ico
 │
 └── components/
-    ├── Header.tsx              # 네비게이션 헤더
-    ├── HeroSection.tsx         # 메인 비주얼 섹션
-    ├── VideoSection.tsx        # YouTube 비디오 섹션
-    ├── VideoPlayer.tsx         # 비디오 플레이어 컴포넌트
-    ├── CompanyLogosSection.tsx # 기업 로고 섹션
-    ├── ValuePropositionSection.tsx # 가치 제안 섹션
-    ├── ProcessFlowSection.tsx  # 프로세스 플로우 섹션
-    ├── FAQSection.tsx          # FAQ 아코디언 섹션
-    ├── AboutSection.tsx        # 소개 섹션
-    └── Footer.tsx              # 푸터
+    ├── Header.tsx              # ナビゲーションヘッダー
+    ├── HeroSection.tsx         # メインビジュアルセクション
+    ├── VideoSection.tsx        # YouTubeビデオセクション
+    ├── VideoPlayer.tsx         # ビデオプレーヤーコンポーネント
+    ├── CompanyLogosSection.tsx # 企業ロゴセクション
+    ├── ValuePropositionSection.tsx # バリュープロポジションセクション
+    ├── ProcessFlowSection.tsx  # プロセスフローセクション
+    ├── FAQSection.tsx          # FAQアコーディオンセクション
+    ├── AboutSection.tsx        # 紹介セクション
+    └── Footer.tsx              # フッター
 ```
 
 ---
 
-## 반응형 디자인 패턴 / レスポンシブデザインパターン
+## レスポンシブデザインパターン
 
-### 1. 모바일/데스크톱 완전 분리 레이아웃
+### 1. モバイル/デスクトップ完全分離レイアウト
 
 ```tsx
-{/* 모바일 전용 / モバイル専用 */}
+{/* モバイル専用 */}
 <section className="md:hidden ...">
   {/* Mobile Layout */}
 </section>
 
-{/* 데스크톱 전용 / デスクトップ専用 */}
+{/* デスクトップ専用 */}
 <section className="hidden md:flex ...">
   {/* Desktop Layout */}
 </section>
 ```
 
-### 2. 디바이스별 테마 분기
+### 2. デバイス別テーマ分岐
 
 ```tsx
-// 모바일: 밝은 배경 + 빨간색 액센트
-// デスクトップ: 다크 배경 + amber 액센트
+// モバイル: 明るい背景 + 赤色アクセント
+// デスクトップ: ダーク背景 + amberアクセント
 className="bg-white md:bg-slate-950"
 className="text-red-600 md:text-amber-500"
 ```
 
-### 3. 세로 화면 (Portrait) 대응
+### 3. 縦画面（Portrait）対応
 
 ```tsx
-// 세로 모니터에서 이미지 초점 조정
+// 縦モニターで画像フォーカス調整
 className="object-center portrait:object-[70%_center]"
 ```
 
-### 4. 반응형 스케일 시스템
+### 4. レスポンシブスケールシステム
 
 ```tsx
-// 타이포그래피
+// タイポグラフィ
 className="text-xl md:text-5xl lg:text-6xl"
 
-// 스페이싱
+// スペーシング
 className="py-12 md:py-24"
 className="gap-3 md:gap-6"
 
-// 아이콘/버튼 크기
+// アイコン/ボタンサイズ
 className="w-10 h-10 md:w-12 md:h-12"
 ```
 
 ---
 
-## 주요 기능 / 主要機能
+## 主要機能
 
 ### Header
-- 스크롤 시 배경 블러 효과
-- 고정 위치 (sticky navigation)
+- スクロール時背景ブラー効果
+- 固定位置（sticky navigation）
 
 ### HeroSection
-- 모바일: 이미지 배경 + 텍스트 오버레이
-- 데스크톱: 풀스크린 히어로 이미지
-- 스태거 애니메이션으로 순차 등장
+- モバイル: 画像背景 + テキストオーバーレイ
+- デスクトップ: フルスクリーンヒーロー画像
+- スタガーアニメーションで順次登場
 
 ### VideoSection
-- YouTube iframe 임베드
-- 16:9 비율 유지 (`aspect-video`)
-- 스크롤 트리거 애니메이션
+- YouTube iframe埋め込み
+- 16:9比率維持（`aspect-video`）
+- スクロールトリガーアニメーション
 
 ### ProcessFlowSection
-- 4단계 프로세스 카드
-- 반응형 그리드 (2열 → 4열)
-- 연결선 애니메이션
+- 4段階プロセスカード
+- レスポンシブグリッド（2列 → 4列）
+- 接続線アニメーション
 
 ### FAQSection
-- 아코디언 UI
-- 상태 관리로 열림/닫힘 제어
+- アコーディオンUI
+- 状態管理で開閉制御
 
 ---
 
-## 개발 서버 / 開発サーバー
+## 開発サーバー
 
 ```bash
-# 의존성 설치 / 依存関係インストール
+# 依存関係インストール
 npm install
 
-# 개발 서버 실행 / 開発サーバー起動
+# 開発サーバー起動
 npm run dev
 
-# 빌드 / ビルド
+# ビルド
 npm run build
 
-# 프로덕션 서버 / プロダクションサーバー
+# プロダクションサーバー
 npm run start
 
-# 린트 / リント
+# リント
 npm run lint
 ```
 
-개발 서버: [http://localhost:3000](http://localhost:3000)
+開発サーバー: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Docker 빌드 / Dockerビルド
+## Dockerビルド
 
 ```bash
-# 이미지 빌드 / イメージビルド
+# イメージビルド
 docker build -t portfolio-frontend .
 
-# 컨테이너 실행 / コンテナ実行
+# コンテナ実行
 docker run -p 3000:3000 portfolio-frontend
 ```
 
 ---
 
-## 디렉토리 구조 / ディレクトリ構造
+## ディレクトリ構造
 
 ```text
 frontend/
-├── README.md           # 이 파일 / このファイル
+├── README.md           # このファイル
+├── README.ko.md        # 韓国語版
 ├── package.json
 ├── next.config.ts
 ├── tailwind.config.ts
@@ -196,9 +195,9 @@ frontend/
 
 ---
 
-## CSS 변수 / CSS変数
+## CSS変数
 
-`globals.css`에서 정의된 디자인 토큰:
+`globals.css`で定義されたデザイントークン:
 
 ```css
 :root {
@@ -221,7 +220,7 @@ frontend/
 
 ---
 
-## 참고 문서 / 参考ドキュメント
+## 参考ドキュメント
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
