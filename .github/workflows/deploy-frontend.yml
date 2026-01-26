@@ -165,16 +165,60 @@ jobs:
         run: |
           echo "password=$(aws ecr get-login-password --region "$AWS_REGION")" >> "$GITHUB_OUTPUT"
 
+      # RDS 및 Cognito 환경변수 조회
+      # RDSおよびCognito環境変数取得
+      - name: Get environment variables from AWS
+        id: get-env-vars
+        run: |
+          # RDS Secret 조회
+          # RDS Secret取得
+          RDS_SECRET_ARN=$(aws cloudformation describe-stacks \
+            --stack-name RdsStack \
+            --query "Stacks[0].Outputs[?OutputKey=='RdsSecretArn'].OutputValue" \
+            --output text 2>/dev/null || echo "")
+
+          if [ -n "$RDS_SECRET_ARN" ]; then
+            RDS_SECRET=$(aws secretsmanager get-secret-value \
+              --secret-id "$RDS_SECRET_ARN" \
+              --query SecretString --output text)
+
+            DB_HOST=$(echo "$RDS_SECRET" | jq -r '.host')
+            DB_PORT=$(echo "$RDS_SECRET" | jq -r '.port')
+            DB_NAME=$(echo "$RDS_SECRET" | jq -r '.dbname')
+            DB_USER=$(echo "$RDS_SECRET" | jq -r '.username')
+            DB_PASSWORD=$(echo "$RDS_SECRET" | jq -r '.password')
+
+            echo "database-url=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Cognito 정보 조회
+          # Cognito情報取得
+          COGNITO_USER_POOL_ID=$(aws cloudformation describe-stacks \
+            --stack-name CognitoStack \
+            --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" \
+            --output text 2>/dev/null || echo "")
+
+          COGNITO_CLIENT_ID=$(aws cloudformation describe-stacks \
+            --stack-name CognitoStack \
+            --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" \
+            --output text 2>/dev/null || echo "")
+
+          echo "cognito-user-pool-id=$COGNITO_USER_POOL_ID" >> "$GITHUB_OUTPUT"
+          echo "cognito-client-id=$COGNITO_CLIENT_ID" >> "$GITHUB_OUTPUT"
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         env:
           ECR_PASSWORD: ${{ steps.ecr-password.outputs.password }}
           IMAGE_URI: ${{ needs.build-and-push.outputs.image-uri }}
+          DATABASE_URL: ${{ steps.get-env-vars.outputs.database-url }}
+          COGNITO_USER_POOL_ID: ${{ steps.get-env-vars.outputs.cognito-user-pool-id }}
+          COGNITO_CLIENT_ID: ${{ steps.get-env-vars.outputs.cognito-client-id }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_PASSWORD,IMAGE_URI,AWS_REGION
+          envs: ECR_PASSWORD,IMAGE_URI,AWS_REGION,DATABASE_URL,COGNITO_USER_POOL_ID,COGNITO_CLIENT_ID
           script: |
             # ECR 로그인
             # ECRログイン
@@ -189,12 +233,16 @@ jobs:
             docker stop nextjs-app || true
             docker rm nextjs-app || true
 
-            # 새 컨테이너 실행
-            # 新コンテナ実行
+            # 새 컨테이너 실행 (환경변수 포함)
+            # 新コンテナ実行（環境変数含む）
             docker run -d \
               --name nextjs-app \
               --restart unless-stopped \
               -p 3000:3000 \
+              -e "DATABASE_URL=$DATABASE_URL" \
+              -e "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID" \
+              -e "NEXT_PUBLIC_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID" \
+              -e "NEXT_PUBLIC_COGNITO_REGION=$AWS_REGION" \
               "$IMAGE_URI"
 
             # 헬스체크

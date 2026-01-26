@@ -13,6 +13,11 @@ export interface Ec2StackProps extends cdk.StackProps {
   readonly environment: string;
   readonly vpc: ec2.IVpc;
   readonly ecrRepository: ecr.IRepository;
+  // RDS 및 Cognito 환경변수 전달용 (선택적)
+  // RDSおよびCognito環境変数伝達用（オプション）
+  readonly rdsSecretArn?: string;
+  readonly cognitoUserPoolId?: string;
+  readonly cognitoClientId?: string;
 }
 
 /**
@@ -49,7 +54,7 @@ export class Ec2Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: Ec2StackProps) {
     super(scope, id, props);
 
-    const { projectName, environment, vpc, ecrRepository } = props;
+    const { projectName, environment, vpc, ecrRepository, rdsSecretArn, cognitoUserPoolId, cognitoClientId } = props;
 
     // ============================================================
     // [L4 - Transport Layer] Security Group (Stateful)
@@ -128,6 +133,16 @@ export class Ec2Stack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')
     );
 
+    // Secrets Manager 읽기 권한 (RDS 인증정보 조회용)
+    // Secrets Manager読み取り権限（RDS認証情報取得用）
+    if (rdsSecretArn) {
+      ec2Role.addToPolicy(new iam.PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [rdsSecretArn],
+        effect: iam.Effect.ALLOW,
+      }));
+    }
+
     // ============================================================
     // User Data 스크립트
     // User Dataスクリプト
@@ -160,10 +175,74 @@ export class Ec2Stack extends cdk.Stack {
       'unzip -q awscliv2.zip',
       './aws/install',
 
+      // jq 설치 (JSON 파싱용)
+      // jqインストール（JSONパース用）
+      'yum install -y jq',
+
+      // 환경변수 파일 디렉토리 생성
+      // 環境変数ファイルディレクトリ作成
+      'mkdir -p /home/ec2-user/app',
+      'touch /home/ec2-user/app/.env',
+      'chown ec2-user:ec2-user /home/ec2-user/app/.env',
+
       // 설치 완료 로그
       // インストール完了ログ
       'echo "Docker and AWS CLI installation completed" >> /var/log/user-data.log'
     );
+
+    // RDS 및 Cognito 환경변수 설정 스크립트 추가
+    // RDSおよびCognito環境変数設定スクリプト追加
+    if (rdsSecretArn) {
+      userData.addCommands(
+        '# RDS 환경변수 설정',
+        '# RDS環境変数設定',
+        `RDS_SECRET_ARN="${rdsSecretArn}"`,
+        'REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)',
+        '',
+        '# Secrets Manager에서 RDS 인증정보 조회',
+        '# Secrets ManagerからRDS認証情報取得',
+        'RDS_SECRET=$(aws secretsmanager get-secret-value --secret-id $RDS_SECRET_ARN --region $REGION --query SecretString --output text)',
+        '',
+        '# JSON에서 값 추출',
+        '# JSONから値抽出',
+        'DB_HOST=$(echo $RDS_SECRET | jq -r .host)',
+        'DB_PORT=$(echo $RDS_SECRET | jq -r .port)',
+        'DB_NAME=$(echo $RDS_SECRET | jq -r .dbname)',
+        'DB_USER=$(echo $RDS_SECRET | jq -r .username)',
+        'DB_PASSWORD=$(echo $RDS_SECRET | jq -r .password)',
+        '',
+        '# 환경변수 파일에 작성',
+        '# 環境変数ファイルに書き込み',
+        'cat > /home/ec2-user/app/.env << EOF',
+        'DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME',
+        'DB_HOST=$DB_HOST',
+        'DB_PORT=$DB_PORT',
+        'DB_NAME=$DB_NAME',
+        'DB_USER=$DB_USER',
+        'DB_PASSWORD=$DB_PASSWORD',
+        'EOF',
+        '',
+        'echo "RDS environment variables configured" >> /var/log/user-data.log'
+      );
+    }
+
+    // Cognito 환경변수 추가
+    // Cognito環境変数追加
+    if (cognitoUserPoolId && cognitoClientId) {
+      userData.addCommands(
+        '# Cognito 환경변수 설정',
+        '# Cognito環境変数設定',
+        'cat >> /home/ec2-user/app/.env << EOF',
+        `NEXT_PUBLIC_COGNITO_USER_POOL_ID=${cognitoUserPoolId}`,
+        `NEXT_PUBLIC_COGNITO_CLIENT_ID=${cognitoClientId}`,
+        `NEXT_PUBLIC_COGNITO_REGION=ap-northeast-1`,
+        'EOF',
+        '',
+        'chown ec2-user:ec2-user /home/ec2-user/app/.env',
+        'chmod 600 /home/ec2-user/app/.env',
+        'echo "Cognito environment variables configured" >> /var/log/user-data.log'
+      );
+    }
 
     // ============================================================
     // EC2 인스턴스 생성

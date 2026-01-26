@@ -21,15 +21,19 @@
 # ============================================================
 FROM node:20-alpine AS deps
 
-# libc6-compat 설치 (Alpine Linux 호환성)
-# libc6-compatインストール（Alpine Linux互換性）
-RUN apk add --no-cache libc6-compat
+# libc6-compat 및 openssl 설치 (Alpine Linux 호환성 + Prisma)
+# libc6-compatおよびopensslインストール（Alpine Linux互換性 + Prisma）
+RUN apk add --no-cache libc6-compat openssl
 
 WORKDIR /app
 
-# 패키지 파일 복사 및 의존성 설치
-# パッケージファイルコピーおよび依存関係インストール
+# 패키지 파일 및 Prisma 스키마 복사
+# パッケージファイルおよびPrismaスキーマコピー
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
+
+# 의존성 설치 (postinstall로 prisma generate 실행)
+# 依存関係インストール（postinstallでprisma generate実行）
 RUN npm ci
 
 # ============================================================
@@ -59,6 +63,10 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
+# openssl 설치 (Prisma 런타임 필요)
+# opensslインストール（Prismaランタイム必要）
+RUN apk add --no-cache openssl
+
 # 프로덕션 환경 설정
 # プロダクション環境設定
 ENV NODE_ENV=production
@@ -72,6 +80,11 @@ RUN adduser --system --uid 1001 nextjs
 # public 폴더 복사
 # publicフォルダコピー
 COPY --from=builder /app/public ./public
+
+# Prisma Client 복사 (런타임에 필요)
+# Prisma Clientコピー（ランタイムに必要）
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # standalone 출력 및 static 파일 복사
 # standalone出力およびstaticファイルコピー

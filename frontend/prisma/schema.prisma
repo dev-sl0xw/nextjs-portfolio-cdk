@@ -1,0 +1,128 @@
+// Prisma 스키마 파일
+// Prismaスキーマファイル
+//
+// 포트폴리오 사이트 데이터 모델 정의
+// ポートフォリオサイトデータモデル定義
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// 사용자 유형 Enum
+// ユーザータイプEnum
+// ============================================================
+enum UserType {
+  JOBSEEKER // 구직자 / 求職者
+  COMPANY   // 기업 / 企業
+}
+
+// ============================================================
+// User 모델
+// Userモデル
+//
+// Cognito User Pool과 연동
+// Cognito User Poolと連携
+// ============================================================
+model User {
+  id          String    @id @default(cuid())
+  cognitoSub  String    @unique // Cognito User Pool의 sub (고유 식별자)
+  email       String    @unique
+  userType    UserType
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 관계: 사용자 유형에 따라 하나만 존재
+  // 関係: ユーザータイプによりひとつだけ存在
+  jobSeeker   JobSeeker?
+  company     Company?
+
+  @@index([cognitoSub])
+  @@index([email])
+}
+
+// ============================================================
+// JobSeeker 모델 (구직자)
+// JobSeekerモデル（求職者）
+//
+// 구직자 프로필 정보
+// 求職者プロフィール情報
+// ============================================================
+model JobSeeker {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 기본 정보 / 基本情報
+  firstName       String?
+  lastName        String?
+  firstNameKana   String?   // 가타카나 / カタカナ
+  lastNameKana    String?   // 가타카나 / カタカナ
+
+  // 프로필 / プロフィール
+  profileImageUrl String?   // S3 Presigned URL로 업로드된 이미지
+  headline        String?   // 한줄 소개 / 一行紹介
+  bio             String?   @db.Text // 자기 소개 / 自己紹介
+
+  // 경력 정보 / 経歴情報
+  currentCompany  String?
+  currentPosition String?
+  yearsOfExp      Int?      // 경력 연수 / 経験年数
+
+  // 희망 조건 / 希望条件
+  desiredSalary   Int?      // 희망 연봉 (만엔) / 希望年収（万円）
+  desiredLocations String[] // 희망 근무지 / 希望勤務地
+
+  // 스킬 / スキル
+  skills          String[]
+
+  // 공개 설정 / 公開設定
+  isPublic        Boolean   @default(false)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================================
+// Company 모델 (기업)
+// Companyモデル（企業）
+//
+// 기업 프로필 정보
+// 企業プロフィール情報
+// ============================================================
+model Company {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 기업 정보 / 企業情報
+  name            String
+  nameKana        String?   // 가타카나 / カタカナ
+  logoUrl         String?   // S3 (companies/ 폴더)
+  website         String?
+  description     String?   @db.Text
+
+  // 사업 정보 / 事業情報
+  industry        String?   // 업종 / 業種
+  employeeCount   Int?      // 종업원 수 / 従業員数
+  foundedYear     Int?      // 설립 연도 / 設立年
+
+  // 위치 정보 / 所在地情報
+  headquarters    String?   // 본사 소재지 / 本社所在地
+
+  // 인증 상태 / 認証状態
+  isVerified      Boolean   @default(false)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([name])
+}
