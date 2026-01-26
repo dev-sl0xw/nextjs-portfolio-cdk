@@ -1,5 +1,5 @@
-// 로그인 페이지
 // ログインページ
+// 로그인 페이지
 
 'use client';
 
@@ -12,13 +12,13 @@ export default function LoginPage() {
   const router = useRouter();
   const { signIn, isLoading: authLoading } = useAuth();
 
-  // 폼 상태 / フォーム状態
+  // フォーム状態 / 폼 상태
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 폼 제출 핸들러 / フォーム送信ハンドラー
+  // フォーム送信ハンドラー / 폼 제출 핸들러
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
@@ -29,18 +29,18 @@ export default function LoginPage() {
       router.push('/');
     } catch (err) {
       const error = err as Error;
-      // Cognito 에러 메시지 한글화 / Cognitoエラーメッセージ韓国語化
+      // Cognitoエラーメッセージ日本語化 / Cognito 에러 메시지 일본어화
       if (error.message.includes('User does not exist')) {
-        setError('등록되지 않은 이메일입니다.');
+        setError('登録されていないメールアドレスです。');
       } else if (error.message.includes('Incorrect username or password')) {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        setError('メールアドレスまたはパスワードが正しくありません。');
       } else if (error.message.includes('User is not confirmed')) {
-        // 이메일 인증 미완료 시 인증 페이지로 이동
         // メール認証未完了時は認証ページへ移動
+        // 이메일 인증 미완료 시 인증 페이지로 이동
         router.push(`/verify?email=${encodeURIComponent(email)}`);
         return;
       } else {
-        setError('로그인에 실패했습니다. 다시 시도해주세요.');
+        setError('ログインに失敗しました。もう一度お試しください。');
       }
       console.error('Login error:', error);
     } finally {
@@ -59,25 +59,25 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* 헤더 / ヘッダー */}
+        {/* ヘッダー / 헤더 */}
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            로그인
+            ログイン
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            계정이 없으신가요?{' '}
+            アカウントをお持ちでないですか？{' '}
             <Link
               href="/signup"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              회원가입
+              新規登録
             </Link>
           </p>
         </div>
 
-        {/* 로그인 폼 / ログインフォーム */}
+        {/* ログインフォーム / 로그인 폼 */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* 에러 메시지 / エラーメッセージ */}
+          {/* エラーメッセージ / 에러 메시지 */}
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">{error}</div>
@@ -85,10 +85,10 @@ export default function LoginPage() {
           )}
 
           <div className="rounded-md shadow-sm -space-y-px">
-            {/* 이메일 입력 / メール入力 */}
+            {/* メール入力 / 이메일 입력 */}
             <div>
               <label htmlFor="email" className="sr-only">
-                이메일
+                メールアドレス
               </label>
               <input
                 id="email"
@@ -97,16 +97,16 @@ export default function LoginPage() {
                 autoComplete="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="이메일"
+                placeholder="メールアドレス"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            {/* 비밀번호 입력 / パスワード入力 */}
+            {/* パスワード入力 / 비밀번호 입력 */}
             <div>
               <label htmlFor="password" className="sr-only">
-                비밀번호
+                パスワード
               </label>
               <input
                 id="password"
@@ -115,14 +115,14 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="비밀번호"
+                placeholder="パスワード"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
 
-          {/* 로그인 버튼 / ログインボタン */}
+          {/* ログインボタン / 로그인 버튼 */}
           <div>
             <button
               type="submit"
@@ -151,10 +151,10 @@ export default function LoginPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  로그인 중...
+                  ログイン中...
                 </span>
               ) : (
-                '로그인'
+                'ログイン'
               )}
             </button>
           </div>

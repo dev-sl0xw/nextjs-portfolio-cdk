@@ -1,5 +1,5 @@
-// 이메일 인증 페이지
 // メール認証ページ
+// 이메일 인증 페이지
 
 'use client';
 
@@ -8,18 +8,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
-// SearchParams를 사용하는 컴포넌트를 분리
 // SearchParamsを使用するコンポーネントを分離
+// SearchParams를 사용하는 컴포넌트를 분리
 function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { confirmSignUp, resendConfirmationCode, isLoading: authLoading } = useAuth();
 
-  // URL에서 이메일 파라미터 가져오기
   // URLからメールパラメータを取得
+  // URL에서 이메일 파라미터 가져오기
   const emailParam = searchParams.get('email') || '';
 
-  // 폼 상태 / フォーム状態
+  // フォーム状態 / 폼 상태
   const [email, setEmail] = useState(emailParam);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -27,15 +27,15 @@ function VerifyForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  // URL 파라미터로 이메일 설정
   // URLパラメータでメール設定
+  // URL 파라미터로 이메일 설정
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam);
     }
   }, [emailParam]);
 
-  // 인증 코드 제출 핸들러 / 認証コード送信ハンドラー
+  // 認証コード送信ハンドラー / 인증 코드 제출 핸들러
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
@@ -44,28 +44,28 @@ function VerifyForm() {
 
     try {
       await confirmSignUp({ email, code });
-      setSuccess('이메일 인증이 완료되었습니다. 로그인해주세요.');
-      // 2초 후 로그인 페이지로 이동
+      setSuccess('メール認証が完了しました。ログインしてください。');
       // 2秒後ログインページへ移動
+      // 2초 후 로그인 페이지로 이동
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     } catch (err) {
       const error = err as Error;
-      // Cognito 에러 메시지 한글화 / Cognitoエラーメッセージ韓国語化
+      // Cognitoエラーメッセージ日本語化 / Cognito 에러 메시지 일본어화
       if (error.message.includes('Invalid verification code')) {
-        setError('인증 코드가 올바르지 않습니다.');
+        setError('認証コードが正しくありません。');
       } else if (error.message.includes('Code has expired')) {
-        setError('인증 코드가 만료되었습니다. 새 코드를 요청해주세요.');
+        setError('認証コードの有効期限が切れました。新しいコードを要求してください。');
       } else if (
         error.message.includes('User cannot be confirmed. Current status is CONFIRMED')
       ) {
-        setSuccess('이미 인증된 계정입니다. 로그인해주세요.');
+        setSuccess('すでに認証されたアカウントです。ログインしてください。');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
-        setError('인증에 실패했습니다. 다시 시도해주세요.');
+        setError('認証に失敗しました。もう一度お試しください。');
       }
       console.error('Verification error:', error);
     } finally {
@@ -73,10 +73,10 @@ function VerifyForm() {
     }
   };
 
-  // 인증 코드 재전송 핸들러 / 認証コード再送信ハンドラー
+  // 認証コード再送信ハンドラー / 인증 코드 재전송 핸들러
   const handleResendCode = async () => {
     if (!email) {
-      setError('이메일을 입력해주세요.');
+      setError('メールアドレスを入力してください。');
       return;
     }
 
@@ -86,16 +86,16 @@ function VerifyForm() {
 
     try {
       await resendConfirmationCode(email);
-      setSuccess('인증 코드가 재전송되었습니다. 이메일을 확인해주세요.');
+      setSuccess('認証コードを再送信しました。メールをご確認ください。');
     } catch (err) {
       const error = err as Error;
       if (error.message.includes('User is already confirmed')) {
-        setSuccess('이미 인증된 계정입니다. 로그인해주세요.');
+        setSuccess('すでに認証されたアカウントです。ログインしてください。');
         setTimeout(() => {
           router.push('/login');
         }, 2000);
       } else {
-        setError('인증 코드 재전송에 실패했습니다.');
+        setError('認証コードの再送信に失敗しました。');
       }
       console.error('Resend code error:', error);
     } finally {
@@ -114,26 +114,26 @@ function VerifyForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* 헤더 / ヘッダー */}
+        {/* ヘッダー / 헤더 */}
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            이메일 인증
+            メール認証
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            이메일로 전송된 6자리 인증 코드를 입력해주세요.
+            メールで送信された6桁の認証コードを入力してください。
           </p>
         </div>
 
-        {/* 인증 폼 / 認証フォーム */}
+        {/* 認証フォーム / 인증 폼 */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* 에러 메시지 / エラーメッセージ */}
+          {/* エラーメッセージ / 에러 메시지 */}
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}
 
-          {/* 성공 메시지 / 成功メッセージ */}
+          {/* 成功メッセージ / 성공 메시지 */}
           {success && (
             <div className="rounded-md bg-green-50 p-4">
               <div className="text-sm text-green-700">{success}</div>
@@ -141,13 +141,13 @@ function VerifyForm() {
           )}
 
           <div className="space-y-4">
-            {/* 이메일 입력 / メール入力 */}
+            {/* メール入力 / 이메일 입력 */}
             <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                이메일
+                メールアドレス
               </label>
               <input
                 id="email"
@@ -162,13 +162,13 @@ function VerifyForm() {
               />
             </div>
 
-            {/* 인증 코드 입력 / 認証コード入力 */}
+            {/* 認証コード入力 / 인증 코드 입력 */}
             <div>
               <label
                 htmlFor="code"
                 className="block text-sm font-medium text-gray-700"
               >
-                인증 코드
+                認証コード
               </label>
               <input
                 id="code"
@@ -185,7 +185,7 @@ function VerifyForm() {
             </div>
           </div>
 
-          {/* 인증 버튼 / 認証ボタン */}
+          {/* 認証ボタン / 인증 버튼 */}
           <div>
             <button
               type="submit"
@@ -214,15 +214,15 @@ function VerifyForm() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  확인 중...
+                  確認中...
                 </span>
               ) : (
-                '인증 확인'
+                '認証確認'
               )}
             </button>
           </div>
 
-          {/* 인증 코드 재전송 / 認証コード再送信 */}
+          {/* 認証コード再送信 / 인증 코드 재전송 */}
           <div className="text-center">
             <button
               type="button"
@@ -230,17 +230,17 @@ function VerifyForm() {
               disabled={isResending}
               className="text-sm text-blue-600 hover:text-blue-500 disabled:opacity-50"
             >
-              {isResending ? '전송 중...' : '인증 코드 재전송'}
+              {isResending ? '送信中...' : '認証コードを再送信'}
             </button>
           </div>
 
-          {/* 로그인 링크 / ログインリンク */}
+          {/* ログインリンク / 로그인 링크 */}
           <div className="text-center">
             <Link
               href="/login"
               className="text-sm text-gray-600 hover:text-gray-500"
             >
-              로그인 페이지로 돌아가기
+              ログインページへ戻る
             </Link>
           </div>
         </form>

@@ -1,5 +1,5 @@
+// 新規登録ページ
 // 회원가입 페이지
-// 会員登録ページ
 
 'use client';
 
@@ -14,7 +14,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const { signUp, isLoading: authLoading } = useAuth();
 
-  // 폼 상태 / フォーム状態
+  // フォーム状態 / 폼 상태
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,38 +22,38 @@ export default function SignUpPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 비밀번호 유효성 검사 / パスワードバリデーション
+  // パスワードバリデーション / 비밀번호 유효성 검사
   const validatePassword = (pwd: string): string | null => {
     if (pwd.length < 8) {
-      return '비밀번호는 8자 이상이어야 합니다.';
+      return 'パスワードは8文字以上必要です。';
     }
     if (!/[a-z]/.test(pwd)) {
-      return '비밀번호에 소문자가 포함되어야 합니다.';
+      return 'パスワードに小文字を含めてください。';
     }
     if (!/[A-Z]/.test(pwd)) {
-      return '비밀번호에 대문자가 포함되어야 합니다.';
+      return 'パスワードに大文字を含めてください。';
     }
     if (!/[0-9]/.test(pwd)) {
-      return '비밀번호에 숫자가 포함되어야 합니다.';
+      return 'パスワードに数字を含めてください。';
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
-      return '비밀번호에 특수문자가 포함되어야 합니다.';
+      return 'パスワードに特殊文字を含めてください。';
     }
     return null;
   };
 
-  // 폼 제출 핸들러 / フォーム送信ハンドラー
+  // フォーム送信ハンドラー / 폼 제출 핸들러
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    // 비밀번호 확인 / パスワード確認
+    // パスワード確認 / 비밀번호 확인
     if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
+      setError('パスワードが一致しません。');
       return;
     }
 
-    // 비밀번호 유효성 검사 / パスワードバリデーション
+    // パスワードバリデーション / 비밀번호 유효성 검사
     const passwordError = validatePassword(password);
     if (passwordError) {
       setError(passwordError);
@@ -64,22 +64,22 @@ export default function SignUpPage() {
 
     try {
       await signUp({ email, password, userType });
-      // 회원가입 성공 시 이메일 인증 페이지로 이동
       // 会員登録成功時メール認証ページへ移動
+      // 회원가입 성공 시 이메일 인증 페이지로 이동
       router.push(`/verify?email=${encodeURIComponent(email)}`);
     } catch (err) {
       const error = err as Error;
-      // Cognito 에러 메시지 한글화 / Cognitoエラーメッセージ韓国語化
+      // Cognitoエラーメッセージ日本語化 / Cognito 에러 메시지 일본어화
       if (error.message.includes('User already exists')) {
-        setError('이미 등록된 이메일입니다.');
+        setError('すでに登録されているメールアドレスです。');
       } else if (error.message.includes('Invalid email')) {
-        setError('올바른 이메일 형식이 아닙니다.');
+        setError('正しいメールアドレス形式ではありません。');
       } else if (error.message.includes('Password did not conform')) {
         setError(
-          '비밀번호는 8자 이상, 대소문자, 숫자, 특수문자를 포함해야 합니다.'
+          'パスワードは8文字以上、大小文字、数字、特殊文字を含める必要があります。'
         );
       } else {
-        setError('회원가입에 실패했습니다. 다시 시도해주세요.');
+        setError('登録に失敗しました。もう一度お試しください。');
       }
       console.error('SignUp error:', error);
     } finally {
@@ -98,35 +98,35 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* 헤더 / ヘッダー */}
+        {/* ヘッダー / 헤더 */}
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            회원가입
+            新規登録
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            이미 계정이 있으신가요?{' '}
+            すでにアカウントをお持ちですか？{' '}
             <Link
               href="/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
-              로그인
+              ログイン
             </Link>
           </p>
         </div>
 
-        {/* 회원가입 폼 / 会員登録フォーム */}
+        {/* 会員登録フォーム / 회원가입 폼 */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* 에러 메시지 / エラーメッセージ */}
+          {/* エラーメッセージ / 에러 메시지 */}
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}
 
-          {/* 사용자 유형 선택 / ユーザータイプ選択 */}
+          {/* ユーザータイプ選択 / 사용자 유형 선택 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              회원 유형
+              会員タイプ
             </label>
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -138,7 +138,7 @@ export default function SignUpPage() {
                 }`}
                 onClick={() => setUserType('jobseeker')}
               >
-                구직자
+                求職者
               </button>
               <button
                 type="button"
@@ -149,19 +149,19 @@ export default function SignUpPage() {
                 }`}
                 onClick={() => setUserType('company')}
               >
-                기업
+                企業
               </button>
             </div>
           </div>
 
           <div className="space-y-4">
-            {/* 이메일 입력 / メール入力 */}
+            {/* メール入力 / 이메일 입력 */}
             <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                이메일
+                メールアドレス
               </label>
               <input
                 id="email"
@@ -176,13 +176,13 @@ export default function SignUpPage() {
               />
             </div>
 
-            {/* 비밀번호 입력 / パスワード入力 */}
+            {/* パスワード入力 / 비밀번호 입력 */}
             <div>
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                비밀번호
+                パスワード
               </label>
               <input
                 id="password"
@@ -191,22 +191,22 @@ export default function SignUpPage() {
                 autoComplete="new-password"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="8자 이상, 대소문자/숫자/특수문자 포함"
+                placeholder="8文字以上、大小文字/数字/特殊文字を含む"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
               <p className="mt-1 text-xs text-gray-500">
-                8자 이상, 대소문자, 숫자, 특수문자를 포함해야 합니다.
+                8文字以上、大小文字、数字、特殊文字を含める必要があります。
               </p>
             </div>
 
-            {/* 비밀번호 확인 / パスワード確認 */}
+            {/* パスワード確認 / 비밀번호 확인 */}
             <div>
               <label
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
               >
-                비밀번호 확인
+                パスワード確認
               </label>
               <input
                 id="confirmPassword"
@@ -215,14 +215,14 @@ export default function SignUpPage() {
                 autoComplete="new-password"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="비밀번호를 다시 입력하세요"
+                placeholder="パスワードをもう一度入力してください"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
           </div>
 
-          {/* 회원가입 버튼 / 会員登録ボタン */}
+          {/* 会員登録ボタン / 회원가입 버튼 */}
           <div>
             <button
               type="submit"
@@ -251,10 +251,10 @@ export default function SignUpPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  처리 중...
+                  処理中...
                 </span>
               ) : (
-                '회원가입'
+                '新規登録'
               )}
             </button>
           </div>

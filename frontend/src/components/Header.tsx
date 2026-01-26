@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 /**
  * Header Component
@@ -16,11 +17,13 @@ import Image from "next/image";
  * - Background blur effect on scroll
  * - Subtle hover animations
  * - Responsive design
+ * - Login/Signup navigation links
  *
  * 特徴:
  * - スクロール時の背景ブラー効果
  * - 繊細なホバーアニメーション
  * - レスポンシブデザイン
+ * - ログイン/新規登録ナビゲーションリンク
  */
 export default function Header() {
   // Scroll state management
@@ -47,7 +50,7 @@ export default function Header() {
       <nav className="max-w-6xl mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="relative">
+          <Link href="/" className="relative">
             <Image
               src="/logo_bizreach.png"
               alt="Logo"
@@ -56,15 +59,29 @@ export default function Header() {
               className="h-8 w-auto"
               priority
             />
-          </a>
+          </Link>
 
-          {/* Login Button */}
-          <button
-            type="button"
-            className="group inline-flex items-center gap-2 px-6 py-2.5 border border-slate-500 text-white text-sm font-medium rounded-lg hover:bg-slate-800/50 hover:border-slate-400 transition-all duration-300 cursor-pointer"
-          >
-            <span>ログイン</span>
-          </button>
+          {/* Navigation Buttons */}
+          {/* ナビゲーションボタン */}
+          <div className="flex items-center gap-3">
+            {/* Login Button */}
+            {/* ログインボタン */}
+            <Link
+              href="/login"
+              className="group inline-flex items-center gap-2 px-6 py-2.5 border border-slate-500 text-white text-sm font-medium rounded-lg hover:bg-slate-800/50 hover:border-slate-400 transition-all duration-300"
+            >
+              <span>ログイン</span>
+            </Link>
+
+            {/* Signup Button */}
+            {/* 新規登録ボタン */}
+            <Link
+              href="/signup"
+              className="group inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-all duration-300"
+            >
+              <span>新規登録</span>
+            </Link>
+          </div>
         </div>
       </nav>
     </header>

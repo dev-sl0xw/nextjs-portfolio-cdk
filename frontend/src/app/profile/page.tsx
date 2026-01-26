@@ -1,8 +1,8 @@
-// 프로필 페이지
 // プロフィールページ
+// 프로필 페이지
 //
-// 로그인한 사용자의 프로필 보기/수정
 // ログインユーザーのプロフィール表示/編集
+// 로그인한 사용자의 프로필 보기/수정
 
 'use client';
 
@@ -13,8 +13,8 @@ import { getIdToken } from '@/lib/cognito';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
 
 // ============================================================
-// 타입 정의
 // 型定義
+// 타입 정의
 // ============================================================
 interface JobSeekerProfile {
   id: string;
@@ -61,19 +61,18 @@ interface ProfileResponse {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { isLoading: authLoading, isAuthenticated } = useAuth();
 
-  // 상태 관리
   // 状態管理
+  // 상태 관리
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [profile, setProfile] = useState<JobSeekerProfile | CompanyProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // 폼 데이터 (JobSeeker)
   // フォームデータ（JobSeeker）
+  // 폼 데이터 (JobSeeker)
   const [jobSeekerForm, setJobSeekerForm] = useState({
     firstName: '',
     lastName: '',
@@ -91,8 +90,8 @@ export default function ProfilePage() {
     isPublic: false,
   });
 
-  // 폼 데이터 (Company)
   // フォームデータ（Company）
+  // 폼 데이터 (Company)
   const [companyForm, setCompanyForm] = useState({
     name: '',
     nameKana: '',
@@ -106,8 +105,8 @@ export default function ProfilePage() {
   });
 
   // ------------------------------------------------------------
-  // 프로필 데이터 로드
   // プロフィールデータロード
+  // 프로필 데이터 로드
   // ------------------------------------------------------------
   useEffect(() => {
     const fetchProfile = async () => {
@@ -127,15 +126,14 @@ export default function ProfilePage() {
         });
 
         if (!response.ok) {
-          throw new Error('프로필 로드 실패');
+          throw new Error('プロフィールの読み込みに失敗しました');
         }
 
         const data: ProfileResponse = await response.json();
         setUserData(data.user);
-        setProfile(data.profile);
 
-        // 폼 데이터 초기화
         // フォームデータ初期化
+        // 폼 데이터 초기화
         if (data.user.userType === 'JOBSEEKER') {
           const p = data.profile as JobSeekerProfile;
           setJobSeekerForm({
@@ -170,7 +168,7 @@ export default function ProfilePage() {
         }
       } catch (err) {
         console.error('Profile fetch error:', err);
-        setError('프로필을 불러오는데 실패했습니다.');
+        setError('プロフィールの読み込みに失敗しました。');
       } finally {
         setIsLoading(false);
       }
@@ -186,8 +184,8 @@ export default function ProfilePage() {
   }, [authLoading, isAuthenticated, router]);
 
   // ------------------------------------------------------------
-  // 프로필 저장
   // プロフィール保存
+  // 프로필 저장
   // ------------------------------------------------------------
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -202,8 +200,8 @@ export default function ProfilePage() {
         return;
       }
 
-      // 저장할 데이터 준비
       // 保存するデータ準備
+      // 저장할 데이터 준비
       let bodyData: Record<string, unknown>;
 
       if (userData?.userType === 'JOBSEEKER') {
@@ -252,24 +250,24 @@ export default function ProfilePage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '저장 실패');
+        throw new Error(errorData.error || '保存に失敗しました');
       }
 
-      setSuccessMessage('프로필이 저장되었습니다. / プロフィールが保存されました。');
+      setSuccessMessage('プロフィールが保存されました。');
 
-      // 3초 후 메시지 숨김
+      // 3秒後メッセージ非表示
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.error('Profile save error:', err);
-      setError('프로필 저장에 실패했습니다. / プロフィール保存に失敗しました。');
+      setError('プロフィールの保存に失敗しました。');
     } finally {
       setIsSaving(false);
     }
   };
 
   // ------------------------------------------------------------
-  // 이미지 업로드 완료 핸들러
   // 画像アップロード完了ハンドラー
+  // 이미지 업로드 완료 핸들러
   // ------------------------------------------------------------
   const handleImageUpload = (imageUrl: string) => {
     if (userData?.userType === 'JOBSEEKER') {
@@ -280,8 +278,8 @@ export default function ProfilePage() {
   };
 
   // ------------------------------------------------------------
-  // 로딩 상태
   // ローディング状態
+  // 로딩 상태
   // ------------------------------------------------------------
   if (authLoading || isLoading) {
     return (
@@ -292,37 +290,37 @@ export default function ProfilePage() {
   }
 
   // ------------------------------------------------------------
-  // 렌더링
   // レンダリング
+  // 렌더링
   // ------------------------------------------------------------
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        {/* 헤더 / ヘッダー */}
+        {/* ヘッダー / 헤더 */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">프로필 설정</h1>
+          <h1 className="text-3xl font-bold text-gray-900">プロフィール設定</h1>
           <p className="mt-2 text-gray-600">
-            {userData?.userType === 'JOBSEEKER' ? '구직자 프로필' : '기업 프로필'}
+            {userData?.userType === 'JOBSEEKER' ? '求職者プロフィール' : '企業プロフィール'}
           </p>
         </div>
 
-        {/* 성공 메시지 / 成功メッセージ */}
+        {/* 成功メッセージ / 성공 메시지 */}
         {successMessage && (
           <div className="mb-6 rounded-md bg-green-50 p-4">
             <div className="text-sm text-green-700">{successMessage}</div>
           </div>
         )}
 
-        {/* 에러 메시지 / エラーメッセージ */}
+        {/* エラーメッセージ / 에러 메시지 */}
         {error && (
           <div className="mb-6 rounded-md bg-red-50 p-4">
             <div className="text-sm text-red-700">{error}</div>
           </div>
         )}
 
-        {/* 프로필 폼 / プロフィールフォーム */}
+        {/* プロフィールフォーム / 프로필 폼 */}
         <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
-          {/* 이미지 업로드 / 画像アップロード */}
+          {/* 画像アップロード / 이미지 업로드 */}
           <div className="flex justify-center pb-6 border-b">
             <ProfileImageUpload
               currentImageUrl={
@@ -334,14 +332,14 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* JobSeeker 폼 / JobSeekerフォーム */}
+          {/* JobSeekerフォーム / JobSeeker 폼 */}
           {userData?.userType === 'JOBSEEKER' && (
             <>
-              {/* 이름 / 名前 */}
+              {/* 名前 / 이름 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                    성 (姓)
+                    姓
                   </label>
                   <input
                     type="text"
@@ -353,7 +351,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                    이름 (名)
+                    名
                   </label>
                   <input
                     type="text"
@@ -365,11 +363,11 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 가타카나 / カタカナ */}
+              {/* カタカナ / 가타카나 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="lastNameKana" className="block text-sm font-medium text-gray-700">
-                    성 (セイ)
+                    セイ
                   </label>
                   <input
                     type="text"
@@ -381,7 +379,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label htmlFor="firstNameKana" className="block text-sm font-medium text-gray-700">
-                    이름 (メイ)
+                    メイ
                   </label>
                   <input
                     type="text"
@@ -393,25 +391,25 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 한줄 소개 / 一行紹介 */}
+              {/* 一行紹介 / 한줄 소개 */}
               <div>
                 <label htmlFor="headline" className="block text-sm font-medium text-gray-700">
-                  한줄 소개 / 一行紹介
+                  一行紹介
                 </label>
                 <input
                   type="text"
                   id="headline"
                   value={jobSeekerForm.headline}
                   onChange={(e) => setJobSeekerForm({ ...jobSeekerForm, headline: e.target.value })}
-                  placeholder="예: 5년차 프론트엔드 개발자"
+                  placeholder="例: 5年目フロントエンドエンジニア"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
 
-              {/* 자기 소개 / 自己紹介 */}
+              {/* 自己紹介 / 자기 소개 */}
               <div>
                 <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                  자기 소개 / 自己紹介
+                  自己紹介
                 </label>
                 <textarea
                   id="bio"
@@ -422,11 +420,11 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* 현재 회사/직책 / 現在の会社/役職 */}
+              {/* 現在の会社/役職 / 현재 회사/직책 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="currentCompany" className="block text-sm font-medium text-gray-700">
-                    현재 회사 / 現在の会社
+                    現在の会社
                   </label>
                   <input
                     type="text"
@@ -438,7 +436,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label htmlFor="currentPosition" className="block text-sm font-medium text-gray-700">
-                    현재 직책 / 現在の役職
+                    現在の役職
                   </label>
                   <input
                     type="text"
@@ -450,11 +448,11 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 경력/희망연봉 / 経験年数/希望年収 */}
+              {/* 経験年数/希望年収 / 경력/희망연봉 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="yearsOfExp" className="block text-sm font-medium text-gray-700">
-                    경력 연수 / 経験年数
+                    経験年数
                   </label>
                   <input
                     type="number"
@@ -466,7 +464,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label htmlFor="desiredSalary" className="block text-sm font-medium text-gray-700">
-                    희망 연봉 (만엔) / 希望年収（万円）
+                    希望年収（万円）
                   </label>
                   <input
                     type="number"
@@ -478,37 +476,37 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 희망 근무지 / 希望勤務地 */}
+              {/* 希望勤務地 / 희망 근무지 */}
               <div>
                 <label htmlFor="desiredLocations" className="block text-sm font-medium text-gray-700">
-                  희망 근무지 / 希望勤務地 (쉼표로 구분)
+                  希望勤務地（カンマ区切り）
                 </label>
                 <input
                   type="text"
                   id="desiredLocations"
                   value={jobSeekerForm.desiredLocations}
                   onChange={(e) => setJobSeekerForm({ ...jobSeekerForm, desiredLocations: e.target.value })}
-                  placeholder="예: 도쿄, 오사카, 리모트"
+                  placeholder="例: 東京, 大阪, リモート"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
 
-              {/* 스킬 / スキル */}
+              {/* スキル / 스킬 */}
               <div>
                 <label htmlFor="skills" className="block text-sm font-medium text-gray-700">
-                  스킬 / スキル (쉼표로 구분)
+                  スキル（カンマ区切り）
                 </label>
                 <input
                   type="text"
                   id="skills"
                   value={jobSeekerForm.skills}
                   onChange={(e) => setJobSeekerForm({ ...jobSeekerForm, skills: e.target.value })}
-                  placeholder="예: React, TypeScript, Node.js"
+                  placeholder="例: React, TypeScript, Node.js"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
 
-              {/* 공개 설정 / 公開設定 */}
+              {/* 公開設定 / 공개 설정 */}
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -518,19 +516,19 @@ export default function ProfilePage() {
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
-                  프로필 공개 / プロフィールを公開する
+                  プロフィールを公開する
                 </label>
               </div>
             </>
           )}
 
-          {/* Company 폼 / Companyフォーム */}
+          {/* Companyフォーム / Company 폼 */}
           {userData?.userType === 'COMPANY' && (
             <>
-              {/* 기업명 / 企業名 */}
+              {/* 企業名 / 기업명 */}
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  기업명 / 企業名 <span className="text-red-500">*</span>
+                  企業名 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -542,10 +540,10 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* 기업명 가타카나 / 企業名カタカナ */}
+              {/* 企業名カタカナ / 기업명 가타카나 */}
               <div>
                 <label htmlFor="nameKana" className="block text-sm font-medium text-gray-700">
-                  기업명 (カタカナ)
+                  企業名（カタカナ）
                 </label>
                 <input
                   type="text"
@@ -556,10 +554,10 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* 웹사이트 / ウェブサイト */}
+              {/* ウェブサイト / 웹사이트 */}
               <div>
                 <label htmlFor="website" className="block text-sm font-medium text-gray-700">
-                  웹사이트 / ウェブサイト
+                  ウェブサイト
                 </label>
                 <input
                   type="url"
@@ -571,10 +569,10 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* 회사 소개 / 会社紹介 */}
+              {/* 会社紹介 / 회사 소개 */}
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                  회사 소개 / 会社紹介
+                  会社紹介
                 </label>
                 <textarea
                   id="description"
@@ -585,24 +583,24 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* 업종/종업원수 / 業種/従業員数 */}
+              {/* 業種/従業員数 / 업종/종업원수 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
-                    업종 / 業種
+                    業種
                   </label>
                   <input
                     type="text"
                     id="industry"
                     value={companyForm.industry}
                     onChange={(e) => setCompanyForm({ ...companyForm, industry: e.target.value })}
-                    placeholder="예: IT/소프트웨어"
+                    placeholder="例: IT/ソフトウェア"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
                 <div>
                   <label htmlFor="employeeCount" className="block text-sm font-medium text-gray-700">
-                    종업원 수 / 従業員数
+                    従業員数
                   </label>
                   <input
                     type="number"
@@ -614,11 +612,11 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 설립연도/본사 / 設立年/本社 */}
+              {/* 設立年/本社 / 설립연도/본사 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="foundedYear" className="block text-sm font-medium text-gray-700">
-                    설립 연도 / 設立年
+                    設立年
                   </label>
                   <input
                     type="number"
@@ -630,14 +628,14 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <label htmlFor="headquarters" className="block text-sm font-medium text-gray-700">
-                    본사 소재지 / 本社所在地
+                    本社所在地
                   </label>
                   <input
                     type="text"
                     id="headquarters"
                     value={companyForm.headquarters}
                     onChange={(e) => setCompanyForm({ ...companyForm, headquarters: e.target.value })}
-                    placeholder="예: 도쿄도 시부야구"
+                    placeholder="例: 東京都渋谷区"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
@@ -645,7 +643,7 @@ export default function ProfilePage() {
             </>
           )}
 
-          {/* 저장 버튼 / 保存ボタン */}
+          {/* 保存ボタン / 저장 버튼 */}
           <div className="pt-4">
             <button
               type="submit"
@@ -674,22 +672,22 @@ export default function ProfilePage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  저장 중...
+                  保存中...
                 </span>
               ) : (
-                '저장 / 保存'
+                '保存'
               )}
             </button>
           </div>
         </form>
 
-        {/* 홈으로 돌아가기 / ホームへ戻る */}
+        {/* ホームへ戻る / 홈으로 돌아가기 */}
         <div className="mt-6 text-center">
           <button
             onClick={() => router.push('/')}
             className="text-sm text-blue-600 hover:text-blue-500"
           >
-            ← 홈으로 돌아가기 / ホームへ戻る
+            ← ホームへ戻る
           </button>
         </div>
       </div>

@@ -1,190 +1,210 @@
-// 인증 흐름 E2E 테스트
 // 認証フローE2Eテスト
+// 인증 흐름 E2E 테스트
 //
-// 회원가입 → 로그인 → 프로필 편집 전체 흐름 테스트
 // 会員登録 → ログイン → プロフィール編集全体フローテスト
+// 회원가입 → 로그인 → 프로필 편집 전체 흐름 테스트
 
 import { test, expect } from '@playwright/test';
 
-// 테스트용 계정 정보 (환경변수에서 가져오거나 기본값 사용)
 // テスト用アカウント情報（環境変数から取得またはデフォルト値使用）
+// 테스트용 계정 정보 (환경변수에서 가져오거나 기본값 사용)
 const TEST_EMAIL = process.env.E2E_TEST_EMAIL || `test-${Date.now()}@example.com`;
 const TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || 'TestPassword123!';
 
-test.describe('인증 흐름 / 認証フロー', () => {
+test.describe('認証フロー / 인증 흐름', () => {
   // ============================================================
-  // 테스트 1: 홈페이지 접근
   // テスト1: ホームページアクセス
+  // 테스트 1: 홈페이지 접근
   // ============================================================
-  test('홈페이지가 정상적으로 로드됨', async ({ page }) => {
+  test('ホームページが正常にロードされる', async ({ page }) => {
     await page.goto('/');
 
-    // 페이지 로드 확인
+    // ページロード確認
     await expect(page).toHaveTitle(/.*/, { timeout: 10000 });
   });
 
   // ============================================================
-  // 테스트 2: 로그인 페이지 접근
   // テスト2: ログインページアクセス
+  // 테스트 2: 로그인 페이지 접근
   // ============================================================
-  test('로그인 페이지가 정상적으로 로드됨', async ({ page }) => {
+  test('ログインページが正常にロードされる', async ({ page }) => {
     await page.goto('/login');
 
-    // 로그인 폼 요소 확인
-    await expect(page.getByRole('heading', { name: '로그인' })).toBeVisible();
-    await expect(page.getByPlaceholder('이메일')).toBeVisible();
-    await expect(page.getByPlaceholder('비밀번호')).toBeVisible();
-    await expect(page.getByRole('button', { name: '로그인' })).toBeVisible();
+    // ログインフォーム要素確認
+    await expect(page.getByRole('heading', { name: 'ログイン' })).toBeVisible();
+    await expect(page.getByPlaceholder('メールアドレス')).toBeVisible();
+    await expect(page.getByPlaceholder('パスワード')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'ログイン' })).toBeVisible();
   });
 
   // ============================================================
-  // 테스트 3: 회원가입 페이지 접근
   // テスト3: 会員登録ページアクセス
+  // 테스트 3: 회원가입 페이지 접근
   // ============================================================
-  test('회원가입 페이지가 정상적으로 로드됨', async ({ page }) => {
+  test('新規登録ページが正常にロードされる', async ({ page }) => {
     await page.goto('/signup');
 
-    // 회원가입 폼 요소 확인
-    await expect(page.getByRole('heading', { name: '회원가입' })).toBeVisible();
-    await expect(page.getByPlaceholder('이메일')).toBeVisible();
-    await expect(page.getByPlaceholder('비밀번호')).toBeVisible();
+    // 会員登録フォーム要素確認
+    await expect(page.getByRole('heading', { name: '新規登録' })).toBeVisible();
+    await expect(page.getByPlaceholder('example@email.com')).toBeVisible();
+    await expect(page.getByText('パスワード', { exact: false })).toBeVisible();
   });
 
   // ============================================================
-  // 테스트 4: 로그인 → 로그인 성공 확인 (기존 테스트 계정 사용)
   // テスト4: ログイン → ログイン成功確認（既存テストアカウント使用）
+  // 테스트 4: 로그인 → 로그인 성공 확인 (기존 테스트 계정 사용)
   // ============================================================
-  test('유효한 자격 증명으로 로그인 성공', async ({ page }) => {
-    // 테스트 계정이 환경변수로 설정된 경우에만 실행
-    test.skip(!process.env.E2E_TEST_EMAIL, '테스트 계정이 설정되지 않음');
+  test('有効な資格情報でログイン成功', async ({ page }) => {
+    // テストアカウントが環境変数で設定された場合のみ実行
+    test.skip(!process.env.E2E_TEST_EMAIL, 'テストアカウントが設定されていません');
 
     await page.goto('/login');
 
-    // 이메일 입력
-    await page.getByPlaceholder('이메일').fill(process.env.E2E_TEST_EMAIL!);
+    // メール入力
+    await page.getByPlaceholder('メールアドレス').fill(process.env.E2E_TEST_EMAIL!);
 
-    // 비밀번호 입력
-    await page.getByPlaceholder('비밀번호').fill(process.env.E2E_TEST_PASSWORD!);
+    // パスワード入力
+    await page.getByPlaceholder('パスワード').fill(process.env.E2E_TEST_PASSWORD!);
 
-    // 로그인 버튼 클릭
-    await page.getByRole('button', { name: '로그인' }).click();
+    // ログインボタンクリック
+    await page.getByRole('button', { name: 'ログイン' }).click();
 
-    // 홈페이지로 리다이렉트 확인 (또는 에러 메시지 없음 확인)
+    // ホームページへリダイレクト確認
     await expect(page).toHaveURL('/', { timeout: 10000 });
   });
 
   // ============================================================
-  // 테스트 5: 프로필 페이지 접근 (미인증 시 리다이렉트)
   // テスト5: プロフィールページアクセス（未認証時リダイレクト）
+  // 테스트 5: 프로필 페이지 접근 (미인증 시 리다이렉트)
   // ============================================================
-  test('미인증 상태에서 프로필 페이지 접근 시 로그인 페이지로 리다이렉트', async ({ page }) => {
+  test('未認証状態でプロフィールページアクセス時ログインページへリダイレクト', async ({ page }) => {
     await page.goto('/profile');
 
-    // 로그인 페이지로 리다이렉트 확인
+    // ログインページへリダイレクト確認
     await expect(page).toHaveURL('/login', { timeout: 10000 });
   });
 
   // ============================================================
-  // 테스트 6: 로그인 후 프로필 페이지 접근 및 편집
   // テスト6: ログイン後プロフィールページアクセスおよび編集
+  // 테스트 6: 로그인 후 프로필 페이지 접근 및 편집
   // ============================================================
-  test('로그인 후 프로필 편집 흐름', async ({ page }) => {
-    // 테스트 계정이 환경변수로 설정된 경우에만 실행
-    test.skip(!process.env.E2E_TEST_EMAIL, '테스트 계정이 설정되지 않음');
+  test('ログイン後プロフィール編集フロー', async ({ page }) => {
+    // テストアカウントが環境変数で設定された場合のみ実行
+    test.skip(!process.env.E2E_TEST_EMAIL, 'テストアカウントが設定されていません');
 
-    // 1. 로그인
+    // 1. ログイン
     await page.goto('/login');
-    await page.getByPlaceholder('이메일').fill(process.env.E2E_TEST_EMAIL!);
-    await page.getByPlaceholder('비밀번호').fill(process.env.E2E_TEST_PASSWORD!);
-    await page.getByRole('button', { name: '로그인' }).click();
+    await page.getByPlaceholder('メールアドレス').fill(process.env.E2E_TEST_EMAIL!);
+    await page.getByPlaceholder('パスワード').fill(process.env.E2E_TEST_PASSWORD!);
+    await page.getByRole('button', { name: 'ログイン' }).click();
 
-    // 홈으로 리다이렉트 대기
+    // ホームへリダイレクト待機
     await expect(page).toHaveURL('/', { timeout: 10000 });
 
-    // 2. 프로필 페이지로 이동
+    // 2. プロフィールページへ移動
     await page.goto('/profile');
 
-    // 프로필 설정 페이지 로드 확인
-    await expect(page.getByRole('heading', { name: '프로필 설정' })).toBeVisible({ timeout: 10000 });
+    // プロフィール設定ページロード確認
+    await expect(page.getByRole('heading', { name: 'プロフィール設定' })).toBeVisible({ timeout: 10000 });
 
-    // 3. 프로필 폼이 표시되는지 확인
-    // (JobSeeker 또는 Company에 따라 다른 폼이 표시됨)
-    const saveButton = page.getByRole('button', { name: /저장|保存/ });
+    // 3. プロフィールフォームが表示されるか確認
+    // (JobSeekerまたはCompanyによって異なるフォームが表示される)
+    const saveButton = page.getByRole('button', { name: /保存/ });
     await expect(saveButton).toBeVisible();
 
-    // 4. 프로필 수정 테스트 (한줄 소개 입력)
+    // 4. プロフィール修正テスト（一行紹介入力）
     const headlineInput = page.locator('#headline');
     if (await headlineInput.isVisible()) {
-      const testHeadline = `E2E 테스트 - ${Date.now()}`;
+      const testHeadline = `E2Eテスト - ${Date.now()}`;
       await headlineInput.fill(testHeadline);
 
-      // 저장 버튼 클릭
+      // 保存ボタンクリック
       await saveButton.click();
 
-      // 성공 메시지 확인
-      await expect(page.getByText(/프로필이 저장되었습니다|プロフィールが保存されました/)).toBeVisible({ timeout: 10000 });
+      // 成功メッセージ確認
+      await expect(page.getByText(/プロフィールが保存されました/)).toBeVisible({ timeout: 10000 });
     }
   });
 
   // ============================================================
-  // 테스트 7: 잘못된 비밀번호로 로그인 실패
   // テスト7: 間違ったパスワードでログイン失敗
+  // 테스트 7: 잘못된 비밀번호로 로그인 실패
   // ============================================================
-  test('잘못된 비밀번호로 로그인 시 에러 메시지 표시', async ({ page }) => {
+  test('間違ったパスワードでログイン時エラーメッセージ表示', async ({ page }) => {
     await page.goto('/login');
 
-    // 이메일 입력
-    await page.getByPlaceholder('이메일').fill('test@example.com');
+    // メール入力
+    await page.getByPlaceholder('メールアドレス').fill('test@example.com');
 
-    // 잘못된 비밀번호 입력
-    await page.getByPlaceholder('비밀번호').fill('WrongPassword123!');
+    // 間違ったパスワード入力
+    await page.getByPlaceholder('パスワード').fill('WrongPassword123!');
 
-    // 로그인 버튼 클릭
-    await page.getByRole('button', { name: '로그인' }).click();
+    // ログインボタンクリック
+    await page.getByRole('button', { name: 'ログイン' }).click();
 
-    // 에러 메시지 확인
-    await expect(page.getByText(/등록되지 않은|올바르지 않습니다|실패했습니다/)).toBeVisible({ timeout: 10000 });
+    // エラーメッセージ確認
+    await expect(page.getByText(/登録されていない|正しくありません|失敗しました/)).toBeVisible({ timeout: 10000 });
   });
 
   // ============================================================
-  // 테스트 8: 회원가입 폼 유효성 검사
   // テスト8: 会員登録フォームバリデーション
+  // 테스트 8: 회원가입 폼 유효성 검사
   // ============================================================
-  test('회원가입 폼에서 필수 필드 확인', async ({ page }) => {
+  test('新規登録フォームで必須フィールド確認', async ({ page }) => {
     await page.goto('/signup');
 
-    // 빈 폼으로 제출 시도 (HTML5 validation)
-    const submitButton = page.getByRole('button', { name: /회원가입|登録/ });
+    // 空のフォームで送信試行（HTML5 validation）
+    const submitButton = page.getByRole('button', { name: /新規登録/ });
     await submitButton.click();
 
-    // 이메일 필드가 필수인지 확인 (HTML5 validation)
-    const emailInput = page.getByPlaceholder('이메일');
+    // メールフィールドが必須か確認（HTML5 validation）
+    const emailInput = page.getByPlaceholder('example@email.com');
     await expect(emailInput).toHaveAttribute('required', '');
   });
 });
 
 // ============================================================
-// 네비게이션 테스트
 // ナビゲーションテスト
+// 네비게이션 테스트
 // ============================================================
-test.describe('네비게이션 / ナビゲーション', () => {
-  test('로그인 페이지에서 회원가입 링크 클릭', async ({ page }) => {
+test.describe('ナビゲーション / 네비게이션', () => {
+  test('ログインページから新規登録リンククリック', async ({ page }) => {
     await page.goto('/login');
 
-    // 회원가입 링크 클릭
-    await page.getByRole('link', { name: '회원가입' }).click();
+    // 新規登録リンククリック
+    await page.getByRole('link', { name: '新規登録' }).click();
 
-    // 회원가입 페이지로 이동 확인
+    // 新規登録ページへ移動確認
     await expect(page).toHaveURL('/signup');
   });
 
-  test('회원가입 페이지에서 로그인 링크 클릭', async ({ page }) => {
+  test('新規登録ページからログインリンククリック', async ({ page }) => {
     await page.goto('/signup');
 
-    // 로그인 링크 클릭
-    await page.getByRole('link', { name: '로그인' }).click();
+    // ログインリンククリック
+    await page.getByRole('link', { name: 'ログイン' }).click();
 
-    // 로그인 페이지로 이동 확인
+    // ログインページへ移動確認
     await expect(page).toHaveURL('/login');
+  });
+
+  test('ホームページからログインページへ移動', async ({ page }) => {
+    await page.goto('/');
+
+    // ヘッダーのログインボタンクリック
+    await page.getByRole('link', { name: 'ログイン' }).click();
+
+    // ログインページへ移動確認
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('ホームページから新規登録ページへ移動', async ({ page }) => {
+    await page.goto('/');
+
+    // ヘッダーの新規登録ボタンクリック
+    await page.getByRole('link', { name: '新規登録' }).click();
+
+    // 新規登録ページへ移動確認
+    await expect(page).toHaveURL('/signup');
   });
 });
