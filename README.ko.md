@@ -69,6 +69,7 @@
 - ✅ 하이클래스 채용 서비스 스타일 반응형 디자인 (모바일/데스크톱 완전 분리)
 - ✅ 자동 배포 파이프라인 (GitHub Actions → ECR → EC2)
 - ✅ 커스텀 404 에러 페이지 (CloudFront → S3)
+- ✅ 커스텀 도메인 설정 (ACM + CloudFront, vibe.er.ht)
 
 ---
 
@@ -76,8 +77,9 @@
 
 | 페이지 | URL |
 | --- | --- |
-| **메인 사이트** | [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net) |
-| **404 에러 페이지** | [https://d2opqv3ja0x6v5.cloudfront.net/404.html](https://d2opqv3ja0x6v5.cloudfront.net/404.html) |
+| **메인 사이트 (커스텀 도메인)** | [https://vibe.er.ht](https://vibe.er.ht) |
+| **메인 사이트 (CloudFront)** | [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net) |
+| **404 에러 페이지** | [https://vibe.er.ht/404.html](https://vibe.er.ht/404.html) |
 
 ---
 
@@ -86,10 +88,12 @@
 ```text
                               Internet
                                   │
+                          vibe.er.ht (CNAME)
+                                  │
                                   ▼
                          ┌───────────────┐
-                         │  CloudFront   │
-                         │  (HTTPS/ACM)  │
+                         │  CloudFront   │◄──── ACM Certificate
+                         │  (HTTPS/ACM)  │      (us-east-1)
                          └───────────────┘
                           │           │
                     (메인 트래픽)  (에러 시)
@@ -216,6 +220,7 @@ nextjs-portfolio-cdk/
 │       ├── ec2-stack.ts
 │       ├── alb-stack.ts
 │       ├── cloudfront-stack.ts
+│       ├── certificate-stack.ts  # ACM 인증서 (us-east-1)
 │       └── ecr-stack.ts
 │
 ├── frontend/                 # Next.js 앱

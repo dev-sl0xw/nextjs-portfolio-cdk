@@ -10,7 +10,10 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 
 ## 🌐 배포 URL / デプロイURL
 
-**CloudFront**: [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net)
+| 도메인 | URL |
+| --- | --- |
+| **Custom Domain** | [https://vibe.er.ht](https://vibe.er.ht) |
+| **CloudFront** | [https://d2opqv3ja0x6v5.cloudfront.net](https://d2opqv3ja0x6v5.cloudfront.net) |
 
 ---
 
@@ -27,17 +30,17 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 │  │ - VPC        │    │ - ALB        │    │ - CloudFront │   │
 │  │ - Subnets    │    │ - Target Grp │    │ - S3 Bucket  │   │
 │  │ - IGW        │    │ - Security   │    │ - OAC        │   │
-│  └──────────────┘    │   Group      │    └──────────────┘   │
-│         │            └──────────────┘                        │
-│         │                   │                                │
-│         ▼                   ▼                                │
-│  ┌──────────────┐    ┌──────────────┐                        │
-│  │  EC2 Stack   │    │  ECR Stack   │                        │
-│  │              │    │              │                        │
-│  │ - EC2        │    │ - ECR Repo   │                        │
-│  │ - User Data  │    │              │                        │
-│  │ - IAM Role   │    │              │                        │
-│  └──────────────┘    └──────────────┘                        │
+│  └──────────────┘    │   Group      │    │ - Custom Dom │   │
+│         │            └──────────────┘    └──────────────┘   │
+│         │                   │                   ▲            │
+│         ▼                   ▼                   │            │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐   │
+│  │  EC2 Stack   │    │  ECR Stack   │    │ Certificate  │   │
+│  │              │    │              │    │  Stack       │   │
+│  │ - EC2        │    │ - ECR Repo   │    │ (us-east-1)  │   │
+│  │ - User Data  │    │              │    │ - ACM Cert   │   │
+│  │ - IAM Role   │    │              │    │   (DNS検証)   │   │
+│  └──────────────┘    └──────────────┘    └──────────────┘   │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -46,13 +49,14 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 
 ## 스택 상세 / スタック詳細
 
-| 스택 | 파일 | 리소스 |
-| --- | --- | --- |
-| **VPC Stack** | `lib/vpc-stack.ts` | VPC, Public Subnets (2 AZ), Internet Gateway |
-| **EC2 Stack** | `lib/ec2-stack.ts` | EC2 (t2.micro), Security Group, IAM Role, User Data |
-| **ALB Stack** | `lib/alb-stack.ts` | Application Load Balancer, Target Group, Listener |
-| **CloudFront Stack** | `lib/cloudfront-stack.ts` | CloudFront Distribution, S3 Bucket (Error Pages), OAC |
-| **ECR Stack** | `lib/ecr-stack.ts` | ECR Repository |
+| 스택 | 파일 | 리전 | 리소스 |
+| --- | --- | --- | --- |
+| **VPC Stack** | `lib/vpc-stack.ts` | ap-northeast-1 | VPC, Public Subnets (2 AZ), Internet Gateway |
+| **EC2 Stack** | `lib/ec2-stack.ts` | ap-northeast-1 | EC2 (t2.micro), Security Group, IAM Role, User Data |
+| **ALB Stack** | `lib/alb-stack.ts` | ap-northeast-1 | Application Load Balancer, Target Group, Listener |
+| **Certificate Stack** | `lib/certificate-stack.ts` | **us-east-1** | ACM Certificate (DNS Validation) |
+| **CloudFront Stack** | `lib/cloudfront-stack.ts` | ap-northeast-1 | CloudFront Distribution, S3 Bucket (Error Pages), OAC, Custom Domain |
+| **ECR Stack** | `lib/ecr-stack.ts` | ap-northeast-1 | ECR Repository |
 
 ---
 
@@ -69,15 +73,17 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 - Internet Gateway를 통한 직접 인터넷 접속
 - 보안 그룹으로 인바운드 트래픽 제어
 
-### 2. CloudFront + ALB 구조
+### 2. CloudFront + ALB + Custom Domain 구조
 
 ```text
-User → CloudFront (HTTPS) → ALB (HTTP) → EC2
+User → vibe.er.ht → CloudFront (HTTPS/ACM) → ALB (HTTP) → EC2
 ```
 
-- CloudFront에서 HTTPS 종료
+- CloudFront에서 HTTPS 종료 (ACM 인증서)
 - ALB-EC2 구간은 HTTP (비용 절감)
-- CloudFront 기본 도메인 사용 (ACM 인증서 불필요)
+- 커스텀 도메인: `vibe.er.ht`
+- ACM 인증서: us-east-1 리전 (CloudFront 필수)
+- DNS 검증 방식 사용 (외부 DNS 관리자에게 CNAME 추가)
 
 ### 3. S3 Origin Access Control (OAC)
 
@@ -148,8 +154,10 @@ const environment = 'dev';
 
 | 출력 | 설명 |
 | --- | --- |
+| `CustomDomainUrl` | 커스텀 도메인 URL (https://vibe.er.ht) |
 | `DistributionDomainName` | CloudFront 도메인 (접속 URL) |
 | `DistributionId` | CloudFront Distribution ID |
+| `CertificateArn` | ACM 인증서 ARN (us-east-1) |
 | `ErrorPagesBucketName` | S3 에러 페이지 버킷명 |
 | `AlbDnsName` | ALB DNS 이름 |
 | `EcrRepositoryUri` | ECR 리포지토리 URI |
@@ -167,11 +175,12 @@ infrastructure/
 ├── bin/
 │   └── app.ts          # CDK App 엔트리포인트 / エントリーポイント
 └── lib/
-    ├── vpc-stack.ts        # VPC 스택
-    ├── ec2-stack.ts        # EC2 스택
-    ├── alb-stack.ts        # ALB 스택
-    ├── cloudfront-stack.ts # CloudFront 스택
-    └── ecr-stack.ts        # ECR 스택
+    ├── vpc-stack.ts         # VPC 스택
+    ├── ec2-stack.ts         # EC2 스택
+    ├── alb-stack.ts         # ALB 스택
+    ├── certificate-stack.ts # ACM 인증서 (us-east-1)
+    ├── cloudfront-stack.ts  # CloudFront 스택
+    └── ecr-stack.ts         # ECR 스택
 ```
 
 ---
