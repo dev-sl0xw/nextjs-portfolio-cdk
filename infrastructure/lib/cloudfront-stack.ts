@@ -216,24 +216,33 @@ export class CloudFrontStack extends cdk.Stack {
       // 기본 루트 객체 설정 안 함 (Next.js에서 처리)
       // デフォルトルートオブジェクト設定なし（Next.jsで処理）
       defaultRootObject: '',
+
+      // ============================================================
+      // 커스텀 도메인 설정 (선택사항)
+      // カスタムドメイン設定（オプション）
+      //
+      // domainName과 certificate가 모두 제공된 경우에만 설정
+      // domainNameとcertificateが両方提供された場合のみ設定
+      // ============================================================
+      ...(props.domainName && props.certificate && {
+        domainNames: [props.domainName],
+        certificate: props.certificate,
+      }),
     });
 
     // ============================================================
-    // 참고: ACM 인증서 (커스텀 도메인 사용 시)
-    // 参考: ACM証明書（カスタムドメイン使用時）
+    // ACM 인증서 및 커스텀 도메인
+    // ACM証明書およびカスタムドメイン
     //
-    // 커스텀 도메인 사용 시:
-    // 1. us-east-1 리전에 ACM 인증서 생성 필요
-    // 2. Route53 호스팅 존 설정
-    // 3. CloudFront에 대체 도메인 추가
+    // 커스텀 도메인 설정 완료:
+    // - CertificateStack에서 us-east-1 리전에 인증서 생성
+    // - props.domainName과 props.certificate로 설정
+    // - DNS 검증은 외부 DNS 관리자에게 CNAME 추가 요청
     //
-    // カスタムドメイン使用時:
-    // 1. us-east-1リージョンにACM証明書作成が必要
-    // 2. Route53ホスティングゾーン設定
-    // 3. CloudFrontに代替ドメイン追加
-    //
-    // 현재 MVP에서는 CloudFront 기본 도메인 사용
-    // 現在のMVPではCloudFrontデフォルトドメイン使用
+    // カスタムドメイン設定完了:
+    // - CertificateStackでus-east-1リージョンに証明書作成
+    // - props.domainNameとprops.certificateで設定
+    // - DNS検証は外部DNS管理者にCNAME追加を依頼
     // ============================================================
 
     // ============================================================
@@ -257,6 +266,16 @@ export class CloudFrontStack extends cdk.Stack {
       description: 'Portfolio Site URL',
       exportName: `${projectName}-${environment}-site-url`,
     });
+
+    // 커스텀 도메인 URL (설정된 경우)
+    // カスタムドメインURL（設定された場合）
+    if (props.domainName) {
+      new cdk.CfnOutput(this, 'CustomDomainUrl', {
+        value: `https://${props.domainName}`,
+        description: 'Custom Domain URL',
+        exportName: `${projectName}-${environment}-custom-domain-url`,
+      });
+    }
 
     new cdk.CfnOutput(this, 'ErrorPagesBucketName', {
       value: this.errorPagesBucket.bucketName,
