@@ -14,17 +14,45 @@ import {
 } from 'amazon-cognito-identity-js';
 
 // ============================================================
-// Cognito 설정
-// Cognito設定
+// Cognito 설정 (지연 초기화)
+// Cognito設定（遅延初期化）
+//
+// 빌드 시점에는 환경변수가 없으므로 런타임에만 초기화
+// ビルド時には環境変数がないのでランタイムでのみ初期化
 // ============================================================
-const poolData = {
-  UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '',
-  ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || '',
-};
+let userPoolInstance: CognitoUserPool | null = null;
 
-// UserPool 인스턴스 생성
-// UserPoolインスタンス作成
-export const userPool = new CognitoUserPool(poolData);
+// 브라우저 환경 체크 / ブラウザ環境チェック
+const isBrowser = typeof window !== 'undefined';
+
+const getUserPool = (): CognitoUserPool | null => {
+  // SSR/빌드 시에는 null 반환
+  // SSR/ビルド時はnullを返す
+  if (!isBrowser) {
+    return null;
+  }
+
+  if (userPoolInstance) {
+    return userPoolInstance;
+  }
+
+  const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID;
+  const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
+
+  if (!userPoolId || !clientId) {
+    console.warn(
+      'Cognito configuration is missing. Please set NEXT_PUBLIC_COGNITO_USER_POOL_ID and NEXT_PUBLIC_COGNITO_CLIENT_ID environment variables.'
+    );
+    return null;
+  }
+
+  userPoolInstance = new CognitoUserPool({
+    UserPoolId: userPoolId,
+    ClientId: clientId,
+  });
+
+  return userPoolInstance;
+};
 
 // ============================================================
 // 타입 정의
@@ -62,6 +90,12 @@ export const signUp = ({
   userType,
 }: SignUpParams): Promise<ISignUpResult> => {
   return new Promise((resolve, reject) => {
+    const pool = getUserPool();
+    if (!pool) {
+      reject(new Error('Cognito is not configured'));
+      return;
+    }
+
     // 커스텀 속성 설정 (userType)
     // カスタム属性設定（userType）
     const attributeList = [
@@ -75,7 +109,7 @@ export const signUp = ({
       }),
     ];
 
-    userPool.signUp(email, password, attributeList, [], (err, result) => {
+    pool.signUp(email, password, attributeList, [], (err, result) => {
       if (err) {
         reject(err);
         return;
@@ -96,9 +130,15 @@ export const confirmSignUp = ({
   code,
 }: ConfirmSignUpParams): Promise<string> => {
   return new Promise((resolve, reject) => {
+    const pool = getUserPool();
+    if (!pool) {
+      reject(new Error('Cognito is not configured'));
+      return;
+    }
+
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: userPool,
+      Pool: pool,
     });
 
     cognitoUser.confirmRegistration(code, true, (err, result) => {
@@ -120,9 +160,15 @@ export const signIn = ({
   password,
 }: SignInParams): Promise<CognitoUserSession> => {
   return new Promise((resolve, reject) => {
+    const pool = getUserPool();
+    if (!pool) {
+      reject(new Error('Cognito is not configured'));
+      return;
+    }
+
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: userPool,
+      Pool: pool,
     });
 
     const authenticationDetails = new AuthenticationDetails({
@@ -146,7 +192,10 @@ export const signIn = ({
 // ログアウト
 // ============================================================
 export const signOut = (): void => {
-  const cognitoUser = userPool.getCurrentUser();
+  const pool = getUserPool();
+  if (!pool) return;
+
+  const cognitoUser = pool.getCurrentUser();
   if (cognitoUser) {
     cognitoUser.signOut();
   }
@@ -158,7 +207,13 @@ export const signOut = (): void => {
 // ============================================================
 export const getCurrentSession = (): Promise<CognitoUserSession | null> => {
   return new Promise((resolve) => {
-    const cognitoUser = userPool.getCurrentUser();
+    const pool = getUserPool();
+    if (!pool) {
+      resolve(null);
+      return;
+    }
+
+    const cognitoUser = pool.getCurrentUser();
 
     if (!cognitoUser) {
       resolve(null);
@@ -183,7 +238,13 @@ export const getCurrentSession = (): Promise<CognitoUserSession | null> => {
 // ============================================================
 export const getCurrentUser = (): Promise<AuthUser | null> => {
   return new Promise((resolve) => {
-    const cognitoUser = userPool.getCurrentUser();
+    const pool = getUserPool();
+    if (!pool) {
+      resolve(null);
+      return;
+    }
+
+    const cognitoUser = pool.getCurrentUser();
 
     if (!cognitoUser) {
       resolve(null);
@@ -234,9 +295,15 @@ export const getCurrentUser = (): Promise<AuthUser | null> => {
 // ============================================================
 export const resendConfirmationCode = (email: string): Promise<string> => {
   return new Promise((resolve, reject) => {
+    const pool = getUserPool();
+    if (!pool) {
+      reject(new Error('Cognito is not configured'));
+      return;
+    }
+
     const cognitoUser = new CognitoUser({
       Username: email,
-      Pool: userPool,
+      Pool: pool,
     });
 
     cognitoUser.resendConfirmationCode((err, result) => {
