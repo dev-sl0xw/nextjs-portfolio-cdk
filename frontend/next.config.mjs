@@ -16,6 +16,18 @@ const nextConfig = {
         protocol: "https",
         hostname: "logo.clearbit.com",
       },
+      // S3 프로필 이미지 버킷
+      // S3プロフィール画像バケット
+      {
+        protocol: "https",
+        hostname: "portfolio-dev-profile-images-810766399241.s3.ap-northeast-1.amazonaws.com",
+      },
+      // S3 버킷 와일드카드 (다른 환경 대응)
+      // S3バケットワイルドカード（他環境対応）
+      {
+        protocol: "https",
+        hostname: "*.s3.ap-northeast-1.amazonaws.com",
+      },
     ],
   },
 };

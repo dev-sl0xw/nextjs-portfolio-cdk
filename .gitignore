@@ -55,4 +55,5 @@ cdk.context.json
 error-pages/package-lock.json
 
 # Personal notes
-pipeline-workflow.md
+history/
+remind/
