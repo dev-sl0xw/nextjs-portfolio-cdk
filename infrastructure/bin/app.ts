@@ -5,6 +5,7 @@ import { VpcStack } from '../lib/vpc-stack';
 import { EcrStack } from '../lib/ecr-stack';
 import { Ec2Stack } from '../lib/ec2-stack';
 import { AlbStack } from '../lib/alb-stack';
+import { CertificateStack } from '../lib/certificate-stack';
 import { CloudFrontStack } from '../lib/cloudfront-stack';
 
 // 앱 인스턴스 생성
@@ -22,6 +23,10 @@ const env = {
 // プロジェクト共通設定
 const projectName = 'portfolio';
 const environment = 'dev';
+
+// 커스텀 도메인 설정
+// カスタムドメイン設定
+const domainName = 'vibe.er.ht';
 
 // 공통 태그 적용 (aws-best-practices.md 규칙 준수)
 // 共通タグ適用（aws-best-practices.md規則遵守）
@@ -81,16 +86,35 @@ const albStack = new AlbStack(app, 'AlbStack', {
 });
 albStack.addDependency(ec2Stack);
 
+// Certificate Stack (us-east-1 리전 필수)
+// SSL/TLS 인증서 - CloudFront용은 반드시 us-east-1에 생성
+// SSL/TLS証明書 - CloudFront用は必ずus-east-1に作成
+const certificateStack = new CertificateStack(app, 'CertificateStack', {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: 'us-east-1',  // CloudFront 인증서는 us-east-1 필수
+  },
+  projectName,
+  environment,
+  domainName,
+  description: 'ACM Certificate for CloudFront custom domain',
+  crossRegionReferences: true,  // cross-region 참조 활성화
+});
+
 // CloudFront Stack (Task 2.6)
-// 글로벌 CDN + S3 에러 페이지
-// グローバルCDN + S3エラーページ
+// 글로벌 CDN + S3 에러 페이지 + 커스텀 도메인
+// グローバルCDN + S3エラーページ + カスタムドメイン
 const cloudFrontStack = new CloudFrontStack(app, 'CloudFrontStack', {
   env,
   projectName,
   environment,
   alb: albStack.alb,
-  description: 'CloudFront CDN with S3 error pages',
+  domainName,
+  certificate: certificateStack.certificate,
+  description: 'CloudFront CDN with S3 error pages and custom domain',
+  crossRegionReferences: true,  // cross-region 참조 활성화
 });
 cloudFrontStack.addDependency(albStack);
+cloudFrontStack.addDependency(certificateStack);
 
 app.synth();
