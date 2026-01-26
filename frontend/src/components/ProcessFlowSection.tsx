@@ -166,7 +166,7 @@ export default function ProcessFlowSection() {
           }`}
         >
           <a
-            href="#register"
+            href="/signup"
             className="inline-flex items-center gap-2 md:gap-3 px-8 md:px-10 py-4 md:py-5 bg-red-600 md:bg-gradient-to-r md:from-amber-500 md:to-amber-600 text-white md:text-slate-900 font-bold text-base md:text-lg rounded-xl hover:bg-red-700 md:hover:from-amber-400 md:hover:to-amber-500 transition-all duration-300 shadow-lg shadow-red-500/25 md:shadow-amber-500/25 hover:shadow-red-500/40 md:hover:shadow-amber-500/40 hover:-translate-y-1"
           >
             今すぐ無料で登録

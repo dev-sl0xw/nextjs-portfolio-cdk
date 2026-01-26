@@ -201,8 +201,8 @@ test.describe('ナビゲーション / 네비게이션', () => {
   test('ホームページから新規登録ページへ移動', async ({ page }) => {
     await page.goto('/');
 
-    // ヘッダーの新規登録ボタンクリック
-    await page.getByRole('link', { name: '新規登録' }).click();
+    // メインページの「無料で会員登録」ボタンクリック
+    await page.getByRole('link', { name: '無料で会員登録' }).click();
 
     // 新規登録ページへ移動確認
     await expect(page).toHaveURL('/signup');

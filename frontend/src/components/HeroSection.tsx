@@ -182,9 +182,9 @@ export default function HeroSection() {
                     : "opacity-0 translate-y-8"
                 }`}
               >
-                {/* Primary Button */}
+                {/* Primary Button - 会員登録ページへリンク */}
                 <a
-                  href="#register"
+                  href="/signup"
                   className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/30 hover:-translate-y-1"
                 >
                   <span className="relative z-10">無料で会員登録</span>
