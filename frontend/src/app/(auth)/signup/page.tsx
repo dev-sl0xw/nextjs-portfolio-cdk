@@ -21,6 +21,7 @@ export default function SignUpPage() {
   const [userType, setUserType] = useState<UserType>('jobseeker');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // パスワードバリデーション / 비밀번호 유효성 검사
   const validatePassword = (pwd: string): string | null => {
@@ -187,7 +188,7 @@ export default function SignUpPage() {
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -211,7 +212,7 @@ export default function SignUpPage() {
               <input
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 required
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -219,6 +220,24 @@ export default function SignUpPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
+            </div>
+
+            {/* パスワード表示チェックボックス / 비밀번호 표시 체크박스 */}
+            <div className="flex items-center">
+              <input
+                id="showPassword"
+                name="showPassword"
+                type="checkbox"
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+              />
+              <label
+                htmlFor="showPassword"
+                className="ml-2 block text-sm text-gray-700 cursor-pointer"
+              >
+                パスワードを表示する
+              </label>
             </div>
           </div>
 

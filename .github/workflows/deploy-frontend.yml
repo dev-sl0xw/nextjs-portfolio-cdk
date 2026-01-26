@@ -107,20 +107,42 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Cognito 정보 조회 (빌드 전)
+      # Cognito情報取得（ビルド前）
+      - name: Get Cognito config for build
+        id: get-cognito
+        run: |
+          COGNITO_USER_POOL_ID=$(aws cloudformation describe-stacks \
+            --stack-name CognitoStack \
+            --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" \
+            --output text 2>/dev/null || echo "")
+
+          COGNITO_CLIENT_ID=$(aws cloudformation describe-stacks \
+            --stack-name CognitoStack \
+            --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" \
+            --output text 2>/dev/null || echo "")
+
+          echo "cognito-user-pool-id=$COGNITO_USER_POOL_ID" >> "$GITHUB_OUTPUT"
+          echo "cognito-client-id=$COGNITO_CLIENT_ID" >> "$GITHUB_OUTPUT"
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          # github.sha는 커밋 해시로 안전한 값
-          # github.shaはコミットハッシュで安全な値
           IMAGE_TAG: ${{ github.sha }}
+          COGNITO_USER_POOL_ID: ${{ steps.get-cognito.outputs.cognito-user-pool-id }}
+          COGNITO_CLIENT_ID: ${{ steps.get-cognito.outputs.cognito-client-id }}
         run: |
-          # Docker 이미지 빌드
-          # Dockerイメージビルド
-          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
-                       -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
-                       -f frontend/Dockerfile \
-                       frontend/
+          # Docker 이미지 빌드 (NEXT_PUBLIC_ 환경변수는 빌드 시점에 전달)
+          # Dockerイメージビルド（NEXT_PUBLIC_環境変数はビルド時点で渡す）
+          docker build \
+            --build-arg NEXT_PUBLIC_COGNITO_USER_POOL_ID="$COGNITO_USER_POOL_ID" \
+            --build-arg NEXT_PUBLIC_COGNITO_CLIENT_ID="$COGNITO_CLIENT_ID" \
+            --build-arg NEXT_PUBLIC_COGNITO_REGION="$AWS_REGION" \
+            -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
+            -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
+            -f frontend/Dockerfile \
+            frontend/
 
           # ECR에 푸시
           # ECRにプッシュ
