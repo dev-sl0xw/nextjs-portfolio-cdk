@@ -20,29 +20,37 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 ## 스택 구성 / スタック構成
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                       CDK App                                │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐   │
-│  │  VPC Stack   │───▶│  ALB Stack   │───▶│CloudFront    │   │
-│  │              │    │              │    │  Stack       │   │
-│  │ - VPC        │    │ - ALB        │    │ - CloudFront │   │
-│  │ - Subnets    │    │ - Target Grp │    │ - S3 Bucket  │   │
-│  │ - IGW        │    │ - Security   │    │ - OAC        │   │
-│  └──────────────┘    │   Group      │    │ - Custom Dom │   │
-│         │            └──────────────┘    └──────────────┘   │
-│         │                   │                   ▲            │
-│         ▼                   ▼                   │            │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐   │
-│  │  EC2 Stack   │    │  ECR Stack   │    │ Certificate  │   │
-│  │              │    │              │    │  Stack       │   │
-│  │ - EC2        │    │ - ECR Repo   │    │ (us-east-1)  │   │
-│  │ - User Data  │    │              │    │ - ACM Cert   │   │
-│  │ - IAM Role   │    │              │    │   (DNS検証)   │   │
-│  └──────────────┘    └──────────────┘    └──────────────┘   │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                                CDK App                                         │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                                │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
+│  │  VPC Stack   │───▶│  ALB Stack   │───▶│CloudFront    │◄───│ Certificate  │ │
+│  │              │    │              │    │  Stack       │    │  Stack       │ │
+│  │ - VPC        │    │ - ALB        │    │ - CloudFront │    │ (us-east-1)  │ │
+│  │ - Subnets    │    │ - Target Grp │    │ - S3 Bucket  │    │ - ACM Cert   │ │
+│  │ - IGW        │    │ - Security   │    │ - OAC        │    │   (DNS検証)   │ │
+│  └──────────────┘    │   Group      │    │ - Custom Dom │    └──────────────┘ │
+│         │            └──────────────┘    └──────────────┘                     │
+│         │                   │                   ▲                              │
+│         ▼                   ▼                   │                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                     │
+│  │  EC2 Stack   │    │  ECR Stack   │    │Profile Bucket│                     │
+│  │              │    │              │    │  Stack       │                     │
+│  │ - EC2        │    │ - ECR Repo   │    │ - S3 Bucket  │                     │
+│  │ - User Data  │    │              │    │ - CORS       │                     │
+│  │ - IAM Role   │    │              │    │ - Presigned  │                     │
+│  └──────────────┘    └──────────────┘    └──────────────┘                     │
+│         │                                                                      │
+│         │            ┌──────────────┐    ┌──────────────┐                     │
+│         └───────────▶│  RDS Stack   │    │Cognito Stack │                     │
+│                      │              │    │              │                     │
+│                      │ - PostgreSQL │    │ - User Pool  │                     │
+│                      │ - Secrets Mgr│    │ - App Client │                     │
+│                      │ - Security   │    │ - OAuth/OIDC │                     │
+│                      └──────────────┘    └──────────────┘                     │
+│                                                                                │
+└───────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -57,6 +65,9 @@ AWS CDKを使用したポートフォリオサイトインフラコードです�
 | **Certificate Stack** | `lib/certificate-stack.ts` | **us-east-1** | ACM Certificate (DNS Validation) |
 | **CloudFront Stack** | `lib/cloudfront-stack.ts` | ap-northeast-1 | CloudFront Distribution, S3 Bucket (Error Pages), OAC, Custom Domain |
 | **ECR Stack** | `lib/ecr-stack.ts` | ap-northeast-1 | ECR Repository |
+| **Cognito Stack** | `lib/cognito-stack.ts` | ap-northeast-1 | User Pool, User Pool Client, OAuth/OIDC |
+| **RDS Stack** | `lib/rds-stack.ts` | ap-northeast-1 | PostgreSQL 15 (db.t3.micro), Security Group, Secrets Manager |
+| **Profile Bucket Stack** | `lib/profile-bucket-stack.ts` | ap-northeast-1 | S3 Bucket (Profile Images), CORS, Lifecycle Rules |
 
 ---
 
@@ -90,6 +101,64 @@ User → vibe.er.ht → CloudFront (HTTPS/ACM) → ALB (HTTP) → EC2
 - S3 버킷 퍼블릭 액세스 완전 차단
 - CloudFront를 통해서만 접근 가능
 - 에러 페이지 및 정적 에셋 호스팅
+
+### 4. Cognito 인증 / Cognito認証
+
+```text
+선택 이유: 50,000 MAU 무료 (FreeTier 영구)
+選択理由: 50,000 MAU無料（FreeTier永久）
+```
+
+- User Pool: 이메일 기반 로그인
+- OAuth 2.0 / OIDC 표준 지원
+- SRP (Secure Remote Password) 인증
+- 커스텀 속성: userType (jobseeker/company)
+
+### 5. RDS PostgreSQL / RDS PostgreSQL
+
+```text
+비용 최적화: Public Subnet 배치 (NAT Gateway 비용 절감)
+コスト最適化: Public Subnet配置（NAT Gatewayコスト削減）
+```
+
+- db.t3.micro: FreeTier 대상 (750시간/월)
+- PostgreSQL 15 (LTS, 안정성)
+- Secrets Manager: 인증정보 자동 생성 및 관리
+- Security Group: EC2에서만 접근 허용
+
+### 6. 프로필 이미지 S3 / プロフィール画像S3
+
+```text
+이원화 전략:
+二元化戦略:
+- 구직자: Presigned URL로 동적 업로드
+- 求職者: Presigned URLで動的アップロード
+- 기업 로고: GitHub Actions로 정적 배포
+- 企業ロゴ: GitHub Actionsで静的デプロイ
+```
+
+- 퍼블릭 액세스 완전 차단
+- CloudFront OAC를 통한 읽기 전용 접근
+- Presigned URL (5분 만료)로 업로드
+
+### 7. MVP vs Production 구성 / MVP vs Production構成
+
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MVP (현재/現在)                    │  Production 권장/推奨              │
+├─────────────────────────────────────────────────────────────────────────┤
+│  RDS: Public Subnet (단일 AZ)       │  RDS: Private Subnet (Multi-AZ)    │
+│  RDS Failover: 없음                 │  RDS Failover: 자동 (1-2분)         │
+│  Read Replica: 없음                 │  Read Replica: 읽기 분산 권장       │
+│  NAT Gateway: 없음 (비용 절감)      │  NAT Gateway: 필수 (~$30-45/월)     │
+│  서브넷: 10.0.1.0/24, 10.0.2.0/24   │  +10.0.11.0/24, 10.0.21.0/24 (DB)  │
+│  WAF: 없음                          │  AWSManagedRulesCommonRuleSet       │
+│  백업: 7일                          │  백업: 30일 + 크로스 리전           │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+> ⚠️ 현재 RDS Public Subnet 배치는 비용 최적화 선택이며, Security Group으로 EC2에서만 접근 허용
+> ⚠️ 現在のRDS Public Subnet配置はコスト最適化選択であり、Security GroupでEC2からのみアクセス許可
 
 ---
 
@@ -161,6 +230,11 @@ const environment = 'dev';
 | `ErrorPagesBucketName` | S3 에러 페이지 버킷명 |
 | `AlbDnsName` | ALB DNS 이름 |
 | `EcrRepositoryUri` | ECR 리포지토리 URI |
+| `UserPoolId` | Cognito User Pool ID |
+| `UserPoolClientId` | Cognito User Pool Client ID |
+| `RdsEndpoint` | RDS PostgreSQL 엔드포인트 |
+| `RdsSecretArn` | RDS 인증정보 Secrets Manager ARN |
+| `ProfileBucketName` | S3 프로필 이미지 버킷명 |
 
 ---
 
@@ -175,12 +249,15 @@ infrastructure/
 ├── bin/
 │   └── app.ts          # CDK App 엔트리포인트 / エントリーポイント
 └── lib/
-    ├── vpc-stack.ts         # VPC 스택
-    ├── ec2-stack.ts         # EC2 스택
-    ├── alb-stack.ts         # ALB 스택
-    ├── certificate-stack.ts # ACM 인증서 (us-east-1)
-    ├── cloudfront-stack.ts  # CloudFront 스택
-    └── ecr-stack.ts         # ECR 스택
+    ├── vpc-stack.ts             # VPC 스택
+    ├── ec2-stack.ts             # EC2 스택
+    ├── alb-stack.ts             # ALB 스택
+    ├── certificate-stack.ts     # ACM 인증서 (us-east-1)
+    ├── cloudfront-stack.ts      # CloudFront 스택
+    ├── ecr-stack.ts             # ECR 스택
+    ├── cognito-stack.ts         # Cognito 인증 스택
+    ├── rds-stack.ts             # RDS PostgreSQL 스택
+    └── profile-bucket-stack.ts  # 프로필 이미지 S3 스택
 ```
 
 ---

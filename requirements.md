@@ -101,9 +101,72 @@
 
 | 項目 | 値 |
 | --- | --- |
-| 用途 | 404エラーページホスティング、動画ファイルホスティング |
+| 用途 | 404エラーページホスティング、プロフィール画像ホスティング |
 | アクセス制御 | OAC (Origin Access Control) |
 | パブリックアクセス | ブロック (CloudFront経由のみ) |
+
+### 3.6 認証 (Cognito)
+
+#### User Pool
+
+| 項目 | 値 |
+| --- | --- |
+| 認証方式 | メールベースログイン |
+| MFA | OFF (MVP) |
+| パスワードポリシー | 8文字以上、大小文字+数字 |
+| カスタム属性 | userType (jobseeker/company) |
+| FreeTier | 50,000 MAU無料（永久） |
+
+### 3.7 データベース (RDS)
+
+#### RDS PostgreSQL
+
+| 項目 | 値 |
+| --- | --- |
+| エンジン | PostgreSQL 15 |
+| インスタンスタイプ | db.t3.micro (FreeTier) |
+| ストレージ | 20GB (FreeTier) |
+| 配置 | Public Subnet（コスト最適化） |
+| アクセス制御 | Security GroupでEC2からのみ許可 |
+| 認証情報 | Secrets Manager（自動生成） |
+
+#### 設計決定事項
+
+| 項目 | 決定 | 理由 |
+| --- | --- | --- |
+| Public Subnet配置 | ✅ 採用 | NAT Gatewayコスト削減（~$30-45/月） |
+| Multi-AZ | ❌ 無効 | 開発環境、コスト削減 |
+
+#### Production推奨構成
+
+| 項目 | MVP（現在） | Production推奨 |
+| --- | --- | --- |
+| RDS配置 | Public Subnet (単一AZ) | Private Subnet (Multi-AZ) |
+| Failover | なし | 自動Failover (1-2分) |
+| Read Replica | なし | 読み取り分散用に推奨 |
+| サブネット | 10.0.1.0/24, 10.0.2.0/24 | +10.0.11.0/24 (Primary), 10.0.21.0/24 (Replica) |
+| バックアップ | 7日間 | 30日間 + クロスリージョン |
+
+### 3.8 プロフィール画像 (S3)
+
+#### 二元化戦略
+
+| 対象 | 方式 | 説明 |
+| --- | --- | --- |
+| 求職者 | Presigned URL | 動的アップロード（5分有効期限） |
+| 企業ロゴ | GitHub Actions | 静的デプロイ |
+
+#### バケット構造
+
+```text
+portfolio-profile-images-{account-id}/
+├── jobseekers/           ← Presigned URLで動的アップロード
+│   └── {cognito_sub}/
+│       └── profile.jpg
+└── companies/            ← GitHub Actionsで静的デプロイ
+    ├── company-a.png
+    └── company-b.png
+```
 
 ### 3.4 セキュリティ
 
@@ -286,7 +349,6 @@ Push to main → Build Astro → Upload to S3
 - 直訳禁止、自然な意訳推奨
 
 ```typescript
-// 사용자 인증을 처리하는 함수
 // ユーザー認証を処理する関数
 function handleAuth() {
   // ...
@@ -358,7 +420,11 @@ nextjs-portfolio-cdk/
 │       ├── ec2-stack.ts
 │       ├── alb-stack.ts
 │       ├── cloudfront-stack.ts
-│       └── ecr-stack.ts
+│       ├── certificate-stack.ts
+│       ├── ecr-stack.ts
+│       ├── cognito-stack.ts
+│       ├── rds-stack.ts
+│       └── profile-bucket-stack.ts
 ├── frontend/                 # Next.js
 │   ├── Dockerfile
 │   └── src/
