@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     try {
       await signIn({ email, password });
-      router.push('/');
+      router.push('/mypage');
     } catch (err) {
       const error = err as Error;
       // Cognitoエラーメッセージ日本語化 / Cognito 에러 메시지 일본어화

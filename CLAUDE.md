@@ -64,9 +64,22 @@ Next.js 포트폴리오 사이트와 AWS CDK 인프라 프로젝트
 - Infrastructure: `infrastructure/`
 - GitHub Actions: `.github/workflows/`
 - 개인 노트: `pipeline-workflow.md`, `history/`
+- **계획서**: `docs/plans/` (중요!)
+
+## 계획서 저장 규칙
+
+**중요**: 모든 계획서(Plan)는 반드시 `docs/plans/` 폴더에 저장해야 합니다.
+
+### 파일 형식
+- 경로: `docs/plans/YYYY-MM-DD-{계획명}.md`
+- 예시: `docs/plans/2026-01-27-ui-implementation-plan.md`
+
+### 주의사항
+- `~/.claude/plans/` 가 아닌 **프로젝트 내 `docs/plans/`** 에 저장
+- Plan Mode 사용 시에도 이 경로 사용
 
 ## Git 규칙
-- 커밋 메시지: 한국어 + 일본어 병기
+- 커밋 메시지: 일본어 + 한국어 병기
 - Co-Authored-By 포함
 
 ## 학습 내용 저장 규칙 (Remind)
