@@ -21,6 +21,7 @@ import {
   confirmSignUp as cognitoConfirmSignUp,
   getCurrentUser,
   resendConfirmationCode as cognitoResendCode,
+  getIdToken,
   SignUpParams,
   SignInParams,
   ConfirmSignUpParams,
@@ -81,14 +82,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   // ------------------------------------------------------------
-  // 초기 로드 시 세션 확인
-  // 初期ロード時にセッション確認
+  // 초기 로드 시 세션 확인 및 DB 동기화
+  // 初期ロード時にセッション確認およびDB同期
   // ------------------------------------------------------------
   useEffect(() => {
     const initAuth = async () => {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+
+        // 로그인된 사용자가 있으면 DB 동기화
+        // ログイン済みユーザーがいればDB同期
+        if (currentUser) {
+          const token = await getIdToken();
+          if (token) {
+            try {
+              await fetch('/api/profile/me', {
+                method: 'GET',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+            } catch (syncError) {
+              console.warn('Initial DB sync failed:', syncError);
+            }
+          }
+        }
       } catch (error) {
         console.error('Auth initialization error:', error);
         setUser(null);
@@ -119,12 +138,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // ------------------------------------------------------------
+  // DB 동기화 (사용자가 없으면 자동 생성)
+  // DB同期（ユーザーがいなければ自動作成）
+  // ------------------------------------------------------------
+  const syncUserToDatabase = async (): Promise<void> => {
+    try {
+      const token = await getIdToken();
+      if (!token) {
+        console.warn('No token available for DB sync');
+        return;
+      }
+
+      const response = await fetch('/api/profile/me', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Failed to sync user to database:', response.status);
+      }
+    } catch (error) {
+      console.error('DB sync error:', error);
+    }
+  };
+
+  // ------------------------------------------------------------
   // 로그인
   // ログイン
   // ------------------------------------------------------------
   const signIn = async (params: SignInParams): Promise<void> => {
     await cognitoSignIn(params);
     await refreshUser();
+    // DB에 사용자 동기화 (없으면 자동 생성)
+    // DBにユーザー同期（なければ自動作成）
+    await syncUserToDatabase();
   };
 
   // ------------------------------------------------------------
