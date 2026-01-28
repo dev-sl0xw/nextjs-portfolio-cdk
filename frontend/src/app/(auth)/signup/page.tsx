@@ -141,16 +141,16 @@ export default function SignUpPage() {
               >
                 求職者
               </button>
+              {/* TODO: 企業会員登録は後日実装予定 / 기업 회원가입은 추후 구현 예정 */}
               <button
                 type="button"
-                className={`py-3 px-4 border rounded-md text-sm font-medium transition-colors ${
-                  userType === 'company'
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setUserType('company')}
+                disabled
+                className="py-3 px-4 border border-gray-200 rounded-md text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed relative"
               >
                 企業
+                <span className="absolute -top-2 -right-2 bg-gray-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  準備中
+                </span>
               </button>
             </div>
           </div>
