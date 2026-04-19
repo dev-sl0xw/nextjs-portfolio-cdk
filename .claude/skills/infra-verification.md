@@ -55,7 +55,9 @@ grep -r "dev\|prod\|staging" infrastructure/lib/ infrastructure/bin/
 - [ ] 스택 네이밍: `{ProjectName}-{StackName}-{Environment}`
 - [ ] `bin/` 파일에서 스택 인스턴스화 순서 올바름
 
-## Stage 2: 보안 검증
+## Stage 2: 인프라 보안 검증
+
+> **범위 경계**: Stage 2는 **AWS 인프라 레이어** 보안 전담 (Security Group, IAM, KMS, VPC, Secrets Manager, Parameter Store, S3/RDS/EBS 암호화). SQL 인젝션·XSS·CSRF 등 **앱 코드 레이어 보안**은 `quality-reviewer`의 Pass 2에서 검증한다. 양 레이어 걸친 이슈(`.env` 커밋, 하드코딩 URL 등)는 `reviewer` Red Flag에서 교차 확인한다.
 
 ### 보안 그룹 감사
 ```bash
