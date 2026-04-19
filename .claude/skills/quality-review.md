@@ -38,22 +38,31 @@ Pass 1: 정확성 → Pass 2: 보안 → Pass 3: 성능 → Pass 4: 스타일 �
 | 1.7 | 데이터 변환 | 매핑 정확성, 필드 누락, 타입 변환 |
 | 1.8 | Import/Export | 올바른 모듈, 순환 참조 |
 
-## Pass 2: 보안 취약점 (OWASP Top 10)
+## Pass 2: 앱 코드 보안 취약점 (OWASP Top 10)
 
-**핵심 질문**: "이 코드에 보안 구멍이 있는가?"
+**핵심 질문**: "이 앱 코드에 보안 구멍이 있는가?"
 
-### 체크 항목
+> **범위 경계**: Pass 2는 **앱 레이어(frontend/ 이하, API 라우트, Prisma 사용)** 보안만 다룬다. AWS Security Group / IAM / KMS / VPC 등 **인프라 레이어 보안**은 `infra-verifier`의 Stage 2에서 검증한다. `.env` 커밋·하드코딩 URL 등 양 레이어 걸친 이슈는 `reviewer`의 Red Flag에서 교차 검증한다.
+
+### 체크 항목 (앱 전담)
 
 | # | 항목 | 위험 패턴 |
 |---|------|-----------|
-| 2.1 | 인젝션 | 사용자 입력이 직접 쿼리/명령에 삽입 |
-| 2.2 | XSS | `dangerouslySetInnerHTML`, 미이스케이프 출력 |
-| 2.3 | 인증 결함 | 하드코딩 비밀, 약한 토큰 검증, 세션 관리 |
-| 2.4 | 민감 데이터 노출 | 로그에 비밀번호, 응답에 내부 오류 상세 |
-| 2.5 | 접근 제어 | 권한 검증 누락, IDOR |
-| 2.6 | CORS 설정 | 과도한 origin 허용 |
-| 2.7 | 의존성 취약점 | 알려진 취약 버전 |
-| 2.8 | 환경 변수 | 하드코딩된 URL/비밀, .env 파일 커밋 |
+| 2.1 | SQL/NoSQL 인젝션 | `$queryRaw` 미검증 삽입, 동적 문자열 쿼리 |
+| 2.2 | XSS | `dangerouslySetInnerHTML`, 미이스케이프 출력, innerHTML 직접 조작 |
+| 2.3 | 인증/세션 결함 | 하드코딩 비밀(코드 내), 약한 토큰 검증, 세션 만료/재발급 누락 |
+| 2.4 | 민감 데이터 노출 | 로그에 비밀번호/토큰, 응답에 스택 트레이스·내부 DB 정보 |
+| 2.5 | 접근 제어 | 서버 액션/API 권한 검증 누락, IDOR (유저 A가 B 리소스 접근) |
+| 2.6 | CORS/CSRF | Next.js API 과도한 origin 허용, CSRF 토큰 누락 |
+| 2.7 | 의존성 취약점 | `npm audit` 고위험 패키지, 오래된 버전 |
+| 2.8 | 입력 sanitization | zod/valibot 미검증 요청 바디, 파일 업로드 타입/크기 미검사 |
+
+### 범위 밖 (Pass 2 다루지 않음)
+
+- Security Group 인바운드/아웃바운드 규칙 → infra-verifier Stage 2
+- IAM Policy/Role 권한 → infra-verifier Stage 2
+- S3/RDS/EBS 암호화 설정 → infra-verifier Stage 2
+- Secrets Manager / SSM Parameter Store 사용 → infra-verifier Stage 2
 
 ## Pass 3: 성능 & 최적화
 

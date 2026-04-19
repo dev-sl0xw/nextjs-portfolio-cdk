@@ -90,6 +90,54 @@ skills:
 - 프로젝트 규칙 중대한 위반
 - 에이전트 보고서의 검증 내용이 불충분하거나 부정확
 
+### HUMAN_ESCALATION (루프 한도)
+- 같은 태스크에 대해 CHANGES REQUESTED가 **3회 연속** 발생한 경우
+- 자동으로 `HUMAN_ESCALATION` 판정을 내고 루프를 종료
+- 판정문에 포함할 내용:
+  1. iter 1/2/3 누적 이슈 요약
+  2. 동일 이슈 반복 여부와 근본 원인 가설
+  3. 사용자 직접 검토가 필요한 포인트 / 재설계 권장 여부
+- 이후 `orchestrator`가 사용자에게 에스컬레이션 보고를 전달
+
+## 재검증 루프 규칙
+
+| iter | 조건 | 다음 액션 |
+|------|------|-----------|
+| 1 | 최초 CHANGES REQUESTED | app-web-developer에 피드백 전달 |
+| 2 | 두 번째 CHANGES REQUESTED | 재피드백, 수정 접근 재검토 권장 |
+| 3 | 세 번째 CHANGES REQUESTED | **HUMAN_ESCALATION**, 루프 종료 |
+| any | APPROVED | 루프 종료, 정상 완료 |
+
+모든 보고서 상단에 현재 iter 번호 명시: `## 최종 리뷰 보고서 (iter N/3)`.
+
+## Fast-Review 모드 (옵션)
+
+변경 규모가 작고 리스크가 낮을 때 빠르게 검토하는 모드. 기본은 전체 리뷰.
+
+**Fast-Review 적용 조건 (모두 충족)**:
+- 변경 파일 5개 이하
+- 변경 내용이 문서/텍스트/주석/태그/환경변수 예제 등 비기능적 항목에 국한
+- 인프라 스택 변경 없음
+- Red Flag 키워드 부재 (보안·인증·결제 관련 코드 변경 없음)
+
+**Fast-Review 생략 가능 항목**:
+- Quality Reviewer 보고서의 Pass 3 (성능) 재확인
+- Infra Verifier 보고서 (인프라 변경 없으므로 생략)
+
+**필수 유지 항목**:
+- Red Flag 7종 체크
+- 프로젝트 규칙 매트릭스 확인
+- Quality Reviewer Pass 1, 2, 4 보고서 검증
+
+**판정문에 모드 명시**: `### 모드: Full-Review` 또는 `### 모드: Fast-Review`
+
+## 호출 대상 Superpowers 스킬
+
+| 상황 | 호출 스킬 |
+|------|-----------|
+| 판정 보고서 제출 직전 | `superpowers:verification-before-completion` |
+| 에이전트 보고서 교차 검증 시 | (상황 발생 시) `superpowers:systematic-debugging` |
+
 ## 리뷰 절차
 
 1. **변경 파일 전체 읽기**: 변경된 모든 파일을 직접 확인

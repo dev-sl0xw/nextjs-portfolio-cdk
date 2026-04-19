@@ -144,6 +144,26 @@ description: 최종 코드 리뷰 기준 - 프로젝트 규칙 대비 크로스 
 - 프로젝트 규칙: 중대 위반
 - 보고서 품질: 불충분하거나 부정확 (재검증 지시)
 
+### HUMAN_ESCALATION 조건 (루프 한도 초과)
+- 같은 태스크에 대해 CHANGES REQUESTED 판정이 **3회 연속** 발생
+- 이 경우 자동으로 `HUMAN_ESCALATION` 판정을 내리고 루프 종료
+- 판정문에 포함할 내용:
+  1. **누적 이슈 요약**: iter 1/2/3에서 제기된 CRITICAL/WARNING 목록
+  2. **근본 원인 가설**: 동일 이슈 반복 여부, 수정 접근 오류 가능성
+  3. **권장 대응**: 사용자가 직접 검토할 포인트, 재설계 필요 여부
+- 이후 `orchestrator`가 사용자에게 보고하고 다음 지시를 기다림
+
+## 재검증 루프 규칙
+
+| 단계 | 조건 | 다음 액션 |
+|------|------|-----------|
+| iter=1 | 최초 리뷰 → CHANGES REQUESTED | app-web-developer에 피드백 전달, 수정 |
+| iter=2 | 2번째 리뷰 → CHANGES REQUESTED | 재피드백. 수정 접근 재검토 권장 명기 |
+| iter=3 | 3번째 리뷰 → CHANGES REQUESTED | **HUMAN_ESCALATION** 판정, 루프 종료 |
+| any | APPROVED | 루프 종료, 정상 완료 처리 |
+
+보고서 상단에 현재 iter 번호 명시 (예: `## 최종 리뷰 보고서 (iter 2/3)`).
+
 ## 리뷰 출력 형식
 
 ```markdown

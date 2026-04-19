@@ -186,3 +186,66 @@ frontend/src/components/
 2. 단일 책임 원칙
 3. 서버/클라이언트 분리 최적화
 4. 접근성 (ARIA 속성, 시맨틱 HTML)
+
+## 자체 검증 명령 (변경 영역별 필수 실행)
+
+"완료" 보고 전 반드시 아래 명령을 실행하고, 보고서에 **exit code와 첫 오류 라인**을 기재한다. 명령을 실행하지 않고 "TypeScript: ✅"와 같이 선언적 보고를 하지 말 것.
+
+### Frontend 변경 (`frontend/` 이하)
+
+```bash
+cd frontend && npm run lint
+cd frontend && npm run type-check 2>&1 | head -50
+cd frontend && npm run build 2>&1 | tail -30
+```
+
+### Infrastructure 변경 (`infrastructure/` 이하)
+
+```bash
+cd infrastructure && npx cdk synth 2>&1 | tee /tmp/cdk-synth.log
+cd infrastructure && npx cdk diff 2>&1 | head -100   # 배포 전 변경 확인
+```
+
+### Prisma 스키마 변경 (`frontend/prisma/schema.prisma`)
+
+```bash
+cd frontend && npx prisma validate
+cd frontend && npx prisma format
+# 마이그레이션 필요 시:
+cd frontend && npx prisma migrate dev --name <name>
+```
+
+### 보고서 포맷
+
+```markdown
+### 자체 검증 결과
+
+| 명령 | exit | 비고 |
+|------|------|------|
+| `npm run lint` | 0 | 경고 없음 |
+| `npm run type-check` | 0 | |
+| `npm run build` | 0 | Compiled successfully |
+| `npx cdk synth` | 0 | CloudFormation template generated |
+```
+
+실패 시 첫 오류 라인도 인용.
+
+## CI/CD 실패 대응 루틴
+
+GitHub Actions 실행이 실패했을 때:
+
+1. **로그 수집**
+   ```bash
+   gh run list --limit 5
+   gh run view <run-id> --log-failed 2>&1 | tail -100
+   ```
+2. **에러 분류**
+   | 분류 | 징후 | 대응 |
+   |------|------|------|
+   | 빌드 실패 | `ERR!`, `build failed` | 로컬에서 `npm run build` 재현 |
+   | 타입 오류 | `TS2xxx`, `Type error` | `npm run type-check` 로 재현 |
+   | 테스트 실패 | `FAIL`, `Tests: N failed` | 실패 테스트 단독 실행 |
+   | 배포 실패 | `cdk deploy`, `CloudFormation` | IAM/권한/리소스 한도 확인 |
+3. **디버깅**: `superpowers:systematic-debugging` 스킬을 호출하여 근본 원인 파악
+4. **재실행 금지**: 수정 없이 `gh run rerun`을 자동 실행하지 말 것. 수정 후에도 **사용자 확인**을 받은 뒤에만 `gh run rerun` (파괴적 액션 방지 원칙).
+5. **작업 이력**: 원인과 수정 내용을 `history/YYYY-MM-DD-TASK-HISTORY.md`에 기록하도록 orchestrator에 전달.

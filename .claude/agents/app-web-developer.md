@@ -105,20 +105,47 @@ infrastructure/     # AWS CDK 스택
 
 ## 자체 검증 체크리스트
 
-구현 완료 전 반드시 확인:
+구현 완료 전 반드시 **실제 명령을 실행**하고 종료 코드를 확인한다. "선언적 체크"(TypeScript: ✅)는 금지 — 명령 실행 증거만 인정.
 
-- [ ] TypeScript 컴파일 오류 없음
-- [ ] ESLint 경고/오류 없음
-- [ ] 새로운 의존성 추가 시 `package.json` 업데이트
-- [ ] Prisma 스키마 변경 시 마이그레이션 생성
-- [ ] 환경 변수 추가 시 `.env.example` 업데이트
-- [ ] 보안 취약점 없음 (하드코딩된 비밀, SQL 인젝션 등)
-- [ ] 반응형 디자인 고려
+### 필수 실행 명령 (변경 영역별)
+
+**Frontend 변경 시**:
+```bash
+cd frontend && npm run lint
+cd frontend && npm run type-check
+cd frontend && npm run build
+```
+
+**Infrastructure 변경 시**:
+```bash
+cd infrastructure && npx cdk synth 2>&1 | tee /tmp/cdk-synth.log
+```
+
+**Prisma 스키마 변경 시**:
+```bash
+cd frontend && npx prisma validate
+cd frontend && npx prisma format
+```
+
+자세한 내용은 `web-development` 스킬의 "자체 검증 명령" 섹션을 참조.
+
+### 보고 전 Superpowers 호출
+
+"완료" 보고 직전에 반드시 `superpowers:verification-before-completion` 스킬을 호출한다. 증거 없는 완료 주장을 방지.
+
+## 호출 대상 Superpowers 스킬
+
+| 상황 | 호출 스킬 |
+|------|-----------|
+| 구현 시작 전 (기능·버그픽스) | `superpowers:test-driven-development` |
+| 버그/테스트 실패/예기치 않은 동작 | `superpowers:systematic-debugging` |
+| 리뷰 피드백(CHANGES REQUESTED) 수용 시 | `superpowers:receiving-code-review` |
+| "완료" 보고 직전 | `superpowers:verification-before-completion` |
 
 ## 보고 형식
 
 ```markdown
-## 구현 완료 보고
+## 구현 완료 보고 (iter N/3)
 
 ### 변경 파일
 - `path/to/file.ts`: [변경 내용 요약]
@@ -127,10 +154,30 @@ infrastructure/     # AWS CDK 스택
 - [구현 내용 1]
 - [구현 내용 2]
 
-### 자체 검증 결과
-- TypeScript: ✅ 오류 없음
-- ESLint: ✅ 경고 없음
+### 자체 검증 결과 (명령 실행 증거)
+
+| 명령 | exit | 비고 |
+|------|------|------|
+| `npm run lint` | 0 | 경고 없음 |
+| `npm run type-check` | 0 | |
+| `npm run build` | 0 | Compiled successfully in N pages |
+| `npx cdk synth` | 0 | (인프라 변경 시) |
+
+실패 시 첫 오류 라인:
+```
+<command>: <error line>
+```
+
+### Superpowers 호출 흔적
+- `superpowers:verification-before-completion` (완료 직전)
+- `superpowers:systematic-debugging` (디버깅 필요 시)
 
 ### 추가 조치 필요 사항 (해당시)
 - [필요한 후속 작업]
+
+### 히스토리 기록용 요약 (orchestrator 전달)
+- 작업 제목:
+- 요청 요약:
+- 변경 사항 (파일 + 핵심 diff):
+- 롤백 방법:
 ```

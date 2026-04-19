@@ -47,19 +47,27 @@ Ralph-Loop는 같은 코드를 5가지 다른 관점에서 순차적으로 검�
 - [ ] 데이터 변환/매핑 정확성
 - [ ] import/export 올바른가
 
-### Pass 2: 보안 취약점 (OWASP Top 10)
+### Pass 2: 앱 코드 보안 취약점 (OWASP Top 10)
 
-**관점**: "이 코드에 보안 구멍이 있는가?"
+**관점**: "이 앱 코드에 보안 구멍이 있는가?"
+
+> **범위**: frontend/, API 라우트, Prisma 사용 등 **앱 레이어 전담**. AWS Security Group / IAM / KMS 등 인프라 레이어는 `infra-verifier`의 Stage 2에서 다룬다. 중복 검증을 하지 말 것.
 
 체크리스트:
-- [ ] **인젝션**: SQL 인젝션, XSS, 커맨드 인젝션
-- [ ] **인증 결함**: 하드코딩된 비밀, 약한 토큰 검증
-- [ ] **데이터 노출**: 민감 정보 로깅, 응답에 과도한 데이터 포함
-- [ ] **접근 제어**: 권한 검증 누락, IDOR 취약점
-- [ ] **설정 오류**: 디버그 모드 활성화, CORS 설정
-- [ ] **컴포넌트 취약점**: 의존성 버전 확인
-- [ ] **입력 검증**: 사용자 입력 sanitization
-- [ ] **암호화**: 적절한 암호화 알고리즘 사용
+- [ ] **SQL/NoSQL 인젝션**: `$queryRaw` 미검증 삽입, 동적 문자열 쿼리
+- [ ] **XSS**: `dangerouslySetInnerHTML`, 미이스케이프 출력, innerHTML 직접 조작
+- [ ] **인증/세션 결함**: 코드 내 하드코딩 비밀, 약한 토큰 검증, 세션 만료/재발급 누락
+- [ ] **데이터 노출**: 로그에 비밀번호/토큰, 응답에 스택 트레이스·내부 DB 정보
+- [ ] **접근 제어**: 서버 액션/API 권한 검증 누락, IDOR
+- [ ] **CORS/CSRF**: Next.js API 과도한 origin 허용, CSRF 토큰 누락
+- [ ] **의존성 취약점**: `npm audit` 고위험 패키지
+- [ ] **입력 sanitization**: zod/valibot 미검증 요청 바디, 파일 업로드 검사
+
+**Pass 2에서 다루지 않음 (infra-verifier Stage 2 담당)**:
+- Security Group 인바운드/아웃바운드
+- IAM Policy/Role
+- S3/RDS/EBS 암호화 설정
+- Secrets Manager / SSM
 
 ### Pass 3: 성능 & 최적화
 
@@ -113,6 +121,18 @@ Ralph-Loop는 같은 코드를 5가지 다른 관점에서 순차적으로 검�
 | **PASS** | CRITICAL 0건, WARNING 0~1건 |
 | **PASS WITH WARNINGS** | CRITICAL 0건, WARNING 2건 |
 | **FAIL** | CRITICAL 1건 이상 OR WARNING 3건 이상 |
+
+## 호출 대상 Superpowers 스킬
+
+| 상황 | 호출 스킬 |
+|------|-----------|
+| 판정 보고서 제출 직전 | `superpowers:verification-before-completion` (보고서 내용이 실제 코드와 일치하는지 재확인) |
+
+## 재검증 루프 인식
+
+- 각 보고서 상단에 현재 iter 번호 명시 (`## Ralph-Loop 품질 검증 보고서 (iter N/3)`)
+- iter=2 이상이면 이전 보고서의 이슈가 실제로 수정되었는지 diff 기반 확인
+- iter=3에서도 FAIL이면 `reviewer`가 HUMAN_ESCALATION 판정을 내림 (본 에이전트는 검증 루프 한도 결정권 없음)
 
 ## 보고서 형식
 

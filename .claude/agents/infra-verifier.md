@@ -38,19 +38,31 @@ CDK 스택의 보안, 비용, 규정 준수, 네트워크 아키텍처를 5단�
 - 스택 네이밍 컨벤션 준수
 - 환경별 설정 분리 확인 (dev/prod)
 
-### Stage 2: 보안 검증
+### Stage 2: 인프라 보안 검증
+
+> **범위 경계**: AWS 인프라 레이어 보안 전담. SQL 인젝션/XSS/CSRF 등 **앱 코드 레이어** 보안은 `quality-reviewer` Pass 2에서 다룬다.
+
 - **보안 그룹 감사**
-  - 인바운드: 0.0.0.0/0 접근 최소화
+  - 인바운드: 0.0.0.0/0 접근 최소화 (특히 SSH 22, RDP 3389)
   - 불필요한 포트 개방 없음
   - 이그레스 규칙 적절성
 - **IAM 정책 감사**
   - 최소 권한 원칙 준수
   - `*` 리소스 사용 최소화
   - 인라인 정책 vs 관리형 정책 적절성
-- **데이터 암호화**
-  - S3 버킷 암호화 설정
-  - RDS/DynamoDB 암호화
-  - 전송 중 암호화 (TLS)
+  - Role assume 제약 (principal, condition)
+- **데이터 암호화 (at rest)**
+  - S3 버킷 암호화 설정 (SSE-S3 최소, KMS 권장)
+  - RDS/DynamoDB/EBS 암호화
+- **전송 중 암호화 (in transit)**
+  - ALB/CloudFront TLS 인증서 설정
+  - RDS SSL 모드
+- **시크릿 관리**
+  - Secrets Manager / SSM Parameter Store 사용 여부
+  - 하드코딩된 AWS 자격 증명 없음
+- **VPC/서브넷 격리**
+  - 퍼블릭/프라이빗 서브넷 분리
+  - NACL 기본 deny 규칙
 
 ### Stage 3: 비용 검증
 - 각 리소스의 예상 월간 비용 산출
@@ -67,10 +79,20 @@ CDK 스택의 보안, 비용, 규정 준수, 네트워크 아키텍처를 5단�
 - 리전 설정 올바른지 확인
 
 ### Stage 5: 합성 테스트
-- `cdk synth` 실행하여 CloudFormation 템플릿 생성 성공 확인
-- `cdk diff` 실행하여 변경 사항 확인 (가능한 경우)
-- 생성된 템플릿의 리소스 수 및 크기 확인
-- 경고/오류 메시지 분석
+
+**고정 명령 (반드시 실행)**:
+```bash
+cd infrastructure && npx cdk synth 2>&1 | tee /tmp/cdk-synth.log
+cd infrastructure && npx cdk diff 2>&1 | head -100   # 배포 전 변경 확인 가능한 경우
+```
+
+보고서에 다음 포함:
+- `cdk synth` exit code
+- 생성된 CloudFormation 템플릿의 리소스 수
+- 경고/오류 메시지 요약 (`grep -iE "warn|error" /tmp/cdk-synth.log`)
+- `cdk diff` 출력 요약 (변경 리소스 수, replace 여부)
+
+명령을 실행하지 않고 "합성 성공"이라 단정하지 말 것.
 
 ## 프로젝트 인프라 맵
 
@@ -132,3 +154,15 @@ infrastructure/lib/
 |---|--------|------|------|-----------|
 | 1 | CRITICAL | ... | ... | ... |
 ```
+
+## 호출 대상 Superpowers 스킬
+
+| 상황 | 호출 스킬 |
+|------|-----------|
+| 보고서 제출 직전 | `superpowers:verification-before-completion` (`cdk synth` 실제 실행 결과 포함 여부 확인) |
+
+## 재검증 루프 인식
+
+- 보고서 상단에 현재 iter 번호 명시 (`## 인프라 검증 보고서 (iter N/3)`)
+- iter=2 이상이면 이전 지적 사항이 실제로 수정되었는지 스택 diff로 확인
+- iter=3에서도 FAIL이면 `reviewer`가 HUMAN_ESCALATION 판정
