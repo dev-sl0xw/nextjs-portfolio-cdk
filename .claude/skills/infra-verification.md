@@ -14,25 +14,24 @@ description: AWS CDK 인프라 검증 체크리스트 - 스택 구조, 보안, �
 infrastructure/lib/
   ├── ecr-stack.ts          # ECR 리포지토리 (Docker 이미지)
   ├── vpc-stack.ts          # VPC, 서브넷, NAT Gateway
-  ├── rds-stack.ts          # RDS PostgreSQL
   ├── ec2-stack.ts          # EC2 인스턴스 (앱 서버)
   ├── alb-stack.ts          # Application Load Balancer
+  ├── certificate-stack.ts  # CloudFront용 ACM 인증서 (us-east-1)
   ├── cloudfront-stack.ts   # CloudFront CDN
   ├── cognito-stack.ts      # Cognito 사용자 풀
-  ├── route53-stack.ts      # Route 53 DNS
-  └── ses-stack.ts          # SES 이메일
+  ├── rds-stack.ts          # RDS PostgreSQL
+  └── profile-bucket-stack.ts # 프로필 이미지 S3 버킷
 ```
 
 ### 의존성 체인
 ```
-ECR → (독립)
-VPC → RDS, EC2, ALB
+ECR → EC2
+VPC → EC2, RDS, ALB
+EC2 → RDS, ALB
+Certificate (us-east-1) → CloudFront
+ALB → CloudFront
 Cognito → (독립, 프론트엔드에서 참조)
-RDS → EC2 (DB 접속 정보)
-EC2 → ALB (타겟 그룹)
-ALB → CloudFront (오리진)
-CloudFront → Route53 (도메인)
-SES → (독립)
+ProfileBucket → (독립)
 ```
 
 ## Stage 1: 스택 구조 검증

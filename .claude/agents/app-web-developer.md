@@ -37,11 +37,11 @@ skills:
 
 | 영역 | 기술 |
 |------|------|
-| Framework | Next.js 15 (App Router) |
-| UI | React 19, Tailwind CSS |
+| Framework | Next.js 14 (App Router) |
+| UI | React 18, Tailwind CSS |
 | Language | TypeScript (strict mode) |
 | ORM | Prisma |
-| Auth | AWS Cognito |
+| Auth | AWS Cognito + AuthContext |
 | Infra | AWS CDK (TypeScript) |
 | Deploy | ECR → EC2 (Docker) |
 
@@ -52,8 +52,8 @@ frontend/           # Next.js 앱
   src/
     app/            # App Router 페이지
     components/     # React 컴포넌트
+    contexts/       # AuthContext 등 전역 상태
     lib/            # 유틸리티, Prisma 클라이언트
-    styles/         # 글로벌 스타일
   prisma/           # Prisma 스키마, 마이그레이션
 infrastructure/     # AWS CDK 스택
   lib/              # CDK 스택 파일
@@ -71,7 +71,7 @@ infrastructure/     # AWS CDK 스택
 - 함수형 컴포넌트만 사용 (클래스 컴포넌트 금지)
 - 서버 컴포넌트 기본, 클라이언트 컴포넌트는 `'use client'` 명시
 - `useEffect` 최소화 (서버 사이드 데이터 페칭 우선)
-- App Router 라우트 그룹 활용 (`(auth)`, `(dashboard)` 등)
+- App Router 라우트 그룹 활용 (`(auth)`, `(main)` 등)
 
 ### Tailwind CSS
 - 인라인 스타일 대신 Tailwind 유틸리티 클래스 사용
