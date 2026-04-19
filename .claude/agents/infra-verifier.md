@@ -100,13 +100,13 @@ cd infrastructure && npx cdk diff 2>&1 | head -100   # 배포 전 변경 확인 
 infrastructure/lib/
   ├── ecr-stack.ts          # ECR 리포지토리
   ├── vpc-stack.ts          # VPC, 서브넷, NAT
-  ├── rds-stack.ts          # RDS PostgreSQL
   ├── ec2-stack.ts          # EC2 인스턴스
   ├── alb-stack.ts          # Application Load Balancer
+  ├── certificate-stack.ts  # ACM 인증서 (CloudFront용)
   ├── cloudfront-stack.ts   # CloudFront 배포
   ├── cognito-stack.ts      # Cognito 사용자 풀
-  ├── route53-stack.ts      # DNS 레코드
-  └── ses-stack.ts          # SES 이메일
+  ├── rds-stack.ts          # RDS PostgreSQL
+  └── profile-bucket-stack.ts # 프로필 이미지 S3 버킷
 ```
 
 ## 심각도 분류

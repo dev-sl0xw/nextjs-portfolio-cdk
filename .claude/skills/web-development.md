@@ -15,13 +15,17 @@ frontend/src/app/
   ├── (auth)/              # 인증 관련 라우트 그룹
   │   ├── login/page.tsx
   │   ├── signup/page.tsx
-  │   └── layout.tsx
-  ├── (dashboard)/         # 대시보드 라우트 그룹
-  │   ├── profile/page.tsx
-  │   └── layout.tsx
+  │   └── verify/page.tsx
+  ├── (main)/              # 로그인 후 메인 라우트 그룹
+  │   ├── layout.tsx
+  │   ├── mypage/page.tsx
+  │   ├── jobs/page.tsx
+  │   ├── messages/page.tsx
+  │   ├── resume/page.tsx
+  │   └── features/page.tsx
   ├── api/                 # API 라우트
-  │   └── auth/
-  │       └── [...nextauth]/route.ts
+  │   ├── profile/me/route.ts
+  │   └── upload/presigned-url/route.ts
   ├── layout.tsx           # 루트 레이아웃
   └── page.tsx             # 메인 페이지
 ```
@@ -51,34 +55,33 @@ export default function InteractiveComponent() {
 - 기본은 서버 컴포넌트, 인터랙션이 필요할 때만 `'use client'`
 - 서버 컴포넌트에서 데이터 페칭 → 클라이언트 컴포넌트에 props로 전달
 - `useEffect`로 데이터 페칭하지 않기 (서버 사이드 우선)
+- 인증 보호 라우트는 `frontend/src/app/(main)/layout.tsx`에서 처리
+- 클라이언트 인증 상태는 `frontend/src/contexts/AuthContext.tsx`의 `useAuth()` 기준으로 사용
 
 ## API 라우트 패턴
 
 ### 기본 구조
 ```typescript
-// frontend/src/app/api/[resource]/route.ts
+// frontend/src/app/api/profile/me/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
+import { getAuthenticatedUser, isAuthError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
-  try {
-    const data = await prisma.resource.findMany();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('API Error:', error);
+  const authResult = await getAuthenticatedUser(request);
+  if (isAuthError(authResult)) {
     return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+      { error: authResult.error },
+      { status: authResult.status }
     );
   }
-}
 
-export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    // 입력 검증
-    const result = await prisma.resource.create({ data: body });
-    return NextResponse.json(result, { status: 201 });
+    const user = await prisma.user.findUnique({
+      where: { cognitoSub: authResult.sub },
+    });
+
+    return NextResponse.json({ user });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
@@ -91,14 +94,19 @@ export async function POST(request: NextRequest) {
 
 ### 인증 미들웨어 패턴
 ```typescript
-import { getServerSession } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthenticatedUser, isAuthError } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
-  const session = await getServerSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const authResult = await getAuthenticatedUser(request);
+  if (isAuthError(authResult)) {
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: authResult.status }
+    );
   }
-  // 인증된 요청 처리
+
+  return NextResponse.json({ sub: authResult.sub });
 }
 ```
 
@@ -128,25 +136,38 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 ### 클라이언트 사이드
 ```typescript
 'use client';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
-// 로그인
-await signIn('cognito', { callbackUrl: '/dashboard' });
+export default function LoginPage() {
+  const router = useRouter();
+  const { signIn } = useAuth();
 
-// 로그아웃
-await signOut({ callbackUrl: '/' });
+  const handleLogin = async () => {
+    await signIn({ email: 'user@example.com', password: 'password' });
+    router.push('/mypage');
+  };
 
-// 세션 확인
-const { data: session, status } = useSession();
+  return <button onClick={handleLogin}>로그인</button>;
+}
 ```
 
-### 서버 사이드
+### API Route 사이드
 ```typescript
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getAuthenticatedUser, isAuthError } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
 
-const session = await getServerSession(authOptions);
-if (!session) redirect('/login');
+export async function PUT(request: NextRequest) {
+  const authResult = await getAuthenticatedUser(request);
+  if (isAuthError(authResult)) {
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: authResult.status }
+    );
+  }
+
+  return NextResponse.json({ sub: authResult.sub });
+}
 ```
 
 ## Tailwind CSS 패턴
